@@ -15,8 +15,13 @@ class Ability:
         ability = pb.ability(name)
         self.id = ability.id
         self.name = ability.name
-        self.effect = ability.effect_entries[0].short_effect
+        self.effect = self.get_description(ability)
         all_abilities.add_ability(self)
+        
+    def get_description(self, ability):
+        for i in range(len(ability.flavor_text_entries)):
+            if ability.flavor_text_entries[i].language.name == "en":
+                return ability.flavor_text_entries[i].flavor_text
     
     def __str__(self):
         return self.name + " is an ability that " + self.effect
@@ -36,7 +41,10 @@ class Pokemon:
         pokemon = pb.pokemon(id)
         self.id = pokemon.id
         self.name = pokemon.name
-        self.types = (Type(pokemon.types[0].type.name), Type(pokemon.types[1].type.name)) if len(pokemon.types) == 2 else (pokemon.types[0].type.name, None)
+        self.types = (Type(pokemon.types[0].type.name), Type(pokemon.types[1].type.name)) if len(pokemon.types) == 2 else (Type(pokemon.types[0].type.name), None)
+        self.height = pokemon.height
+        self.weight = pokemon.weight
+        self.base_exp = pokemon.base_experience
         self.generation = pokemon.species.generation.name.split("-")[1]
         self.growth_rate = pokemon.species.growth_rate.name
         self.stats = self.get_poke_stats(pokemon)
@@ -90,6 +98,7 @@ class Pokemon:
                     else:
                         moves[pokemon.moves[i].version_group_details[j].move_learn_method.name] = [(move.name, pokemon.moves[i].version_group_details[j].level_learned_at)]
         return moves
+    
 
 class Item:
     def __init__(self, name):
@@ -98,7 +107,7 @@ class Item:
         self.name = item.name
         self.cost = item.cost
         self.category = item.category.name
-        self.effects = [effect.short_effect for effect in item.effect_entries]
+        self.effects = [effect.short_effect for effect in item.effect_entries][0]
         # self.held_by = self.get_held_by(item)
         all_items.add_item(self)
     
@@ -118,11 +127,11 @@ class Move:
         self.name = move.name
         self.type = move.type.name
         self.category = move.damage_class.name
-        self.power = move.power
-        self.accuracy = move.accuracy
+        self.power = move.power if move.power else 0
+        self.accuracy = move.accuracy if move.accuracy else 0
         self.pp = move.pp
         self.target = move.target.name
-        self.effects = [effect.short_effect for effect in move.effect_entries]
+        self.effects = [effect.short_effect for effect in move.effect_entries][0]
         # self.learned_by = self.get_learned_by(move)
         self.ailment = move.meta.ailment.name
         #How this move is learned by a pokemon
@@ -298,7 +307,7 @@ class All_pokes:
         self.all_pokes = []
     
     def add_poke(self, poke : Pokemon):
-        if poke not in self.all_pokes:
+        if poke.name not in self.get_names():
             self.all_pokes.append(poke)
         
     def get_names(self):
@@ -372,7 +381,7 @@ class All_types:
         self.all_types = []
     
     def add_type(self, type_ : Type):
-        if type_ not in self.all_types:
+        if type_.name not in self.get_names():
             self.all_types.append(type_)
         
     def get_names(self):
@@ -412,7 +421,7 @@ class All_abilities:
         self.all_abilities = []
     
     def add_ability(self, ability : Ability):
-        if ability not in self.all_abilities:
+        if ability.name not in self.get_names():
             self.all_abilities.append(ability)
         
     def get_names(self):
@@ -452,7 +461,7 @@ class All_egg_groups:
         self.all_egg_groups = []
     
     def add_egg_group(self, egg_group : Egg_group):
-        if egg_group not in self.all_egg_groups:
+        if egg_group.name not in self.get_names():
             self.all_egg_groups.append(egg_group)
         
     def get_names(self):

@@ -1,8 +1,3 @@
-import pokebase as pb
-from pokemon_ import *
-# from pokemon import Pokemon
-import tqdm
-
 import sqlite3
 
 #Create data base
@@ -50,7 +45,8 @@ CREATE TABLE IF NOT EXISTS Pokemon_Types(
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Abilities(
     id INTEGER PRIMARY KEY,
-    name TEXT
+    name TEXT,
+    effect TEXT
 )
 ''')
 
@@ -103,6 +99,8 @@ cursor.execute('''
 CREATE TABLE IF NOT EXISTS Pokemon_Moves(
     pokemon_id INTEGER,
     move_id INTEGER,
+    learned_how TEXT,
+    learned_at_level INTEGER,
     FOREIGN KEY(pokemon_id) REFERENCES Pokemons(id),
     FOREIGN KEY(move_id) REFERENCES Moves(id)
 )
@@ -225,5 +223,5 @@ CREATE TABLE IF NOT EXISTS Pokemon_Evolution(
 )
 ''') 
 
-
+conn.close()
 

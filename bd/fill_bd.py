@@ -1,13 +1,14 @@
 import pokebase as pb
 import sqlite3
-from pokemon_ import *
+import tqdm
+from pokemon import *
 
 conn = sqlite3.connect('pokedex.db')
 cursor = conn.cursor()
 
 def get_all_pokemons():
     #Get all pokes that belong to versions firered and leafgreen
-    for i in range(1, 152):
+    for i in tqdm.tqdm(range(1, 152)):
         #SI el pokemon ya esta en all_pokes, no lo vuelvas a agregar
         if pb.pokemon(i).name in all_pokes.get_names():
             continue
@@ -15,7 +16,7 @@ def get_all_pokemons():
         
 def get_all_items():
     #Get all items in the game firered and leafgreen
-    for i in range(1, 375):
+    for i in tqdm.tqdm(range(1, 375)):
         item = pb.item(i)
         if item.name in all_items.get_names():
             continue
@@ -23,7 +24,7 @@ def get_all_items():
         
 def get_all_moves():
     #Get all moves in the game firered and leafgreen
-    for i in range(1, 355):
+    for i in tqdm.tqdm(range(1, 355)):
         move = pb.move(i)
         if move.name in all_moves.get_names():
             continue
@@ -31,15 +32,18 @@ def get_all_moves():
     
 def get_all_abilities():
     #Get all abilities in the game firered and leafgreen
-    for i in range(1, 267):
+    for i in tqdm.tqdm(range(1, 267)):
         ability = pb.ability(i)
-        if ability.name in all_abilities.get_names():
-            continue
-        all_abilities.add_ability(Ability(ability.name))
+        for i in range(len(ability.flavor_text_entries)):
+            if ability.flavor_text_entries[i].version_group == "firered-leafgreen":
+                if ability.name in all_abilities.get_names():
+                    continue
+                all_abilities.add_ability(Ability(ability.name))
+                break
         
 def get_all_types():
     #Get all types in the game firered and leafgreen
-    for i in range(1, 19):
+    for i in tqdm.tqdm(range(1, 19)):
         type_ = pb.type_(i)
         if type_.name in all_types.get_names():
             continue
@@ -47,7 +51,7 @@ def get_all_types():
         
 def get_all_egg_groups():
     #Get all egg groups in the game firered and leafgreen
-    for i in range(1, 16):
+    for i in tqdm.tqdm(range(1, 16)):
         egg_group = pb.egg_group(i)
         if egg_group.name in all_egg_groups.get_names():
             continue
@@ -57,8 +61,8 @@ def fill_pokemons():
     for poke in all_pokes.get_all_pokes():
         cursor.execute('''
         INSERT INTO Pokemons(id, name, height, weight, base_experience, growth_rate, generation, hp, attack, defense, special_attack, special_defense, speed)
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-        ''', (poke.id, poke.name, poke.height, poke.weight, poke.base_experience, poke.growth_rate, poke.generation, poke.hp, poke.attack, poke.defense, poke.special_attack, poke.special_defense, poke.speed))
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ''', (poke.id, poke.name, poke.height, poke.weight, poke.base_exp, poke.growth_rate, poke.generation, poke.stats["hp"], poke.stats["attack"], poke.stats["defense"], poke.stats["special-attack"], poke.stats["special-defense"], poke.stats["speed"]))
         conn.commit()
 
 def fill_types():
@@ -72,19 +76,20 @@ def fill_types():
 def fill_pokemon_types():
     for pokemon in all_pokes:
         for type_ in pokemon.types:
-            type_ = all_types.get_by_name(type_.name)
-            cursor.execute('''
-            INSERT INTO Pokemon_Types(pokemon_id, type_id)
-            VALUES(?,?)
-            ''', (pokemon.id, type_.id))
-            conn.commit()
+            if type_:
+                type_ = all_types.get_by_name(type_.name)
+                cursor.execute('''
+                INSERT INTO Pokemon_Types(pokemon_id, type_id)
+                VALUES(?,?)
+                ''', (pokemon.id, type_.id))
+                conn.commit()
             
 def fill_abilities():
     for ability in all_abilities.get_all_abilities():
         cursor.execute('''
-        INSERT INTO Abilities(id, name)
-        VALUES(?,?)
-        ''', (ability.id, ability.name))
+        INSERT INTO Abilities(id, name, effect)
+        VALUES(?,?,?)
+        ''', (ability.id, ability.name, ability.effect))
         conn.commit()
         
 def fill_pokemon_abilities():
@@ -118,27 +123,28 @@ def fill_pokemon_egg_groups():
 def fill_moves():
     for move in all_moves.get_all_moves():
         cursor.execute('''
-        INSERT INTO Moves(id, name, type, power, accuracy, pp, description)
-        VALUES(?,?,?,?,?,?,?)
-        ''', (move.id, move.name, move.type, move.power, move.accuracy, move.pp, move.description))
+        INSERT INTO Moves(id, name, power, pp, accuracy, type_id, category, ailment, target, effect)
+        VALUES(?,?,?,?,?,?,?,?,?,?)
+        ''', (move.id, move.name, move.power, move.pp, move.accuracy, pb.type_(move.type).id, move.category, move.ailment, move.target, move.effects))
         conn.commit()
         
 def fill_pokemon_moves():
     for pokemon in all_pokes:
-        for move in pokemon.moves:
-            move = all_moves.get_by_name(move.name)
-            cursor.execute('''
-            INSERT INTO Pokemon_Moves(pokemon_id, move_id)
-            VALUES(?,?)
-            ''', (pokemon.id, move.id))
-            conn.commit()
+        for type in pokemon.moves.keys():
+            for move, level in pokemon.moves[type]:
+                move = all_moves.get_by_name(move)
+                cursor.execute('''
+                INSERT INTO Pokemon_Moves(pokemon_id, move_id, learned_how, learned_at_level)
+                VALUES(?,?,?,?)
+                ''', (pokemon.id, move.id, type, level))
+                conn.commit()
             
 def fill_items():
     for item in all_items.get_all_items():
         cursor.execute('''
-        INSERT INTO Items(id, name, cost, description)
-        VALUES(?,?,?,?)
-        ''', (item.id, item.name, item.cost, item.description))
+        INSERT INTO Items(id, name, cost, category, effect)
+        VALUES(?,?,?,?,?)
+        ''', (item.id, item.name, item.cost, item.category, item.effects))
         conn.commit()
         
 def fill_pokemon_held_items():
@@ -152,4 +158,24 @@ def fill_pokemon_held_items():
             conn.commit()
  #TODO: Fill locations and areas tables and evolution tables.
         
-        
+
+def get_all():
+    get_all_pokemons()
+    get_all_types()
+    get_all_abilities()
+    get_all_egg_groups()
+    get_all_moves()
+    get_all_items()
+          
+def fill_all():
+    fill_pokemons()
+    fill_types()
+    fill_pokemon_types()
+    fill_abilities()
+    fill_pokemon_abilities()
+    fill_egg_groups()
+    fill_pokemon_egg_groups()
+    fill_moves()
+    fill_pokemon_moves()
+    fill_items()
+    fill_pokemon_held_items()
