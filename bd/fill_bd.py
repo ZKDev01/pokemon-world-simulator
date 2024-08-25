@@ -9,30 +9,31 @@ cursor = conn.cursor()
 def get_all_pokemons():
     #Get all pokes that belong to versions firered and leafgreen
     for i in tqdm.tqdm(range(1, 152)):
-        #SI el pokemon ya esta en all_pokes, no lo vuelvas a agregar
-        if pb.pokemon(i).name in all_pokes.get_names():
+        if all_pokes.get_by_id(i):
             continue
         Pokemon(i)
         
 def get_all_items():
     #Get all items in the game firered and leafgreen
     for i in tqdm.tqdm(range(1, 375)):
-        item = pb.item(i)
-        if item.name in all_items.get_names():
+        if all_items.get_by_id(i):
             continue
+        item = pb.item(i)
         all_items.add_item(Item(item.name))
         
 def get_all_moves():
     #Get all moves in the game firered and leafgreen
     for i in tqdm.tqdm(range(1, 355)):
-        move = pb.move(i)
-        if move.name in all_moves.get_names():
+        if all_moves.get_by_id(i):
             continue
+        move = pb.move(i)
         all_moves.add_move(Move(move.name))
     
 def get_all_abilities():
     #Get all abilities in the game firered and leafgreen
     for i in tqdm.tqdm(range(1, 267)):
+        if all_abilities.get_by_id(i):
+            continue
         ability = pb.ability(i)
         for i in range(len(ability.flavor_text_entries)):
             if ability.flavor_text_entries[i].version_group == "firered-leafgreen":
@@ -44,17 +45,17 @@ def get_all_abilities():
 def get_all_types():
     #Get all types in the game firered and leafgreen
     for i in tqdm.tqdm(range(1, 19)):
-        type_ = pb.type_(i)
-        if type_.name in all_types.get_names():
+        if all_types.get_by_id(i):
             continue
+        type_ = pb.type_(i)
         all_types.add_type(Type(type_.name))
         
 def get_all_egg_groups():
     #Get all egg groups in the game firered and leafgreen
     for i in tqdm.tqdm(range(1, 16)):
-        egg_group = pb.egg_group(i)
-        if egg_group.name in all_egg_groups.get_names():
+        if all_egg_groups.get_by_id(i):
             continue
+        egg_group = pb.egg_group(i)
         all_egg_groups.add_egg_group(Egg_group(egg_group.name))
 
 def fill_pokemons():
@@ -150,7 +151,7 @@ def fill_items():
 def fill_pokemon_held_items():
     for pokemon in all_pokes:
         for item in pokemon.held_items:
-            item = all_items.get_by_name(item.name)
+            item = all_items.get_by_name(item)
             cursor.execute('''
             INSERT INTO Pokemon_Held_Items(pokemon_id, item_id)
             VALUES(?,?)

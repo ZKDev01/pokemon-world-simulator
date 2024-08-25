@@ -322,6 +322,12 @@ class All_pokes:
                 return self.all_pokes[i]
         return None
     
+    def get_by_id(self, id):
+        for i in range(len(self.all_pokes)):
+            if self.all_pokes[i].id == id:
+                return self.all_pokes[i]
+        return None
+    
     def get_all_pokes(self):
         return self.all_pokes
     
@@ -396,6 +402,12 @@ class All_types:
                 return self.all_types[i]
         return None
     
+    def get_by_id(self, id):
+        for i in range(len(self.all_types)):
+            if self.all_types[i].id == id:
+                return self.all_types[i]
+        return None
+    
     def get_all_types(self):
         return self.all_types
     
@@ -436,6 +448,12 @@ class All_abilities:
                 return self.all_abilities[i]
         return None
     
+    def get_by_id(self, id):
+        for i in range(len(self.all_abilities)):
+            if self.all_abilities[i].id == id:
+                return self.all_abilities[i]
+        return None
+    
     def get_all_abilities(self):
         return self.all_abilities
     
@@ -473,6 +491,12 @@ class All_egg_groups:
     def get_by_name(self, name):
         for i in range(len(self.all_egg_groups)):
             if self.all_egg_groups[i].name == name:
+                return self.all_egg_groups[i]
+        return None
+    
+    def get_by_id(self, id):
+        for i in range(len(self.all_egg_groups)):
+            if self.all_egg_groups[i].id == id:
                 return self.all_egg_groups[i]
         return None
     
