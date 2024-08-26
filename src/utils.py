@@ -71,6 +71,15 @@ natures_matrix = [
     [1.0,        1.0,        1.0,        1.0,        1.0],
 ]
 
+class Item():
+    def __init__(self, id, name, cost, category, effect):
+        self.id = id
+        self.name = name
+        self.cost = cost
+        self.category = category
+        self.effect = effect
+
+
 
 class Pokemon():
     def __init__(self, id, name, base_experience, height, weight, abilities, forms, held_items, locations_areas, 
@@ -91,6 +100,8 @@ class Pokemon():
         self.growth_rate = growth_rate
         self.stats = stats
         self.types = types
+
+        self.invetory = []   #inventario de objetos
 
         self.lvl = lvl
 
@@ -142,6 +153,8 @@ class Pokemon():
 
         self.SubirNivel(self.lvl)
 
+        # inicializamos el estado actual del pokemon
+        self.actualState = PokemonState()  #pendiente a arreglar
 
 
     # Se efectua al inicializar el pokemon y cada vez que este sube de nivel,
@@ -173,7 +186,7 @@ class Pokemon():
         if self.exp >= self.next_exp_level:
             self.lvl += 1
             self.SubirNivel(self.lvl)
-            # pendiente si llega a un nivel en que puede aprender un mivimiento nuevo
+            # pendiente si llega a un nivel en que puede aprender un mivimiento nuevo o si puede evolucionar
         self.ev_hp += ev_hp
         self.ev_attack += ev_attack
         self.ev_defense += ev_defense
@@ -181,21 +194,55 @@ class Pokemon():
         self.ev_specialDefense += ev_specialDefense
         self.ev_speed += ev_speed
 
-
-    # Actualiza el estado del pokemon para el combate, ejemplo se actualiza cada cierto tiempo, 
-    # cada cierto tiempo el pokemon se cura, o cuando se le proporciona una pocion curativa o algo parecido
-    # Por implemetar
-
-    def ActualizarEstado(self):
-        pass
-
-
     # Por implementar (devuelve la tabla de nivel-cantidad de experiencia necesaria para subir al proximo nivel)
     def GetExpTable(self, growth_rate):
         return growth_rate
 
 
+# Actualiza el estado del pokemon para el combate, ejemplo se actualiza cada cierto tiempo, 
+# cada cierto tiempo el pokemon se cura, o cuando se le proporciona una pocion curativa o algo parecido
+class PokemonState():
+    def __init__(self, pokemon:Pokemon, type, lvl, negEffect, posEffect, hp, attack, defense, specialAttack, specialDefense, speed):    #aqui negEffect(Paralisis, etc) posEffect(Pociones, etc)
+        self.pokemon = pokemon
+        self.type = type
+        self.lvl = lvl
+        self.negEffect = negEffect
+        self.posEffect = posEffect
+        self.hp = hp
+        self.attack = attack
+        self.defense = defense
+        self.specialAttack = specialAttack
+        self.specialDefense = specialDefense
+        self.speed = speed
 
+
+
+
+
+    # Por implemetar
+
+def UpdatePokemonState(self, pokemonState:PokemonState, pokemon:Pokemon, updateType, potion=None):
+
+        updateTypeArr = ['time', 'home', 'potion']
+
+        if (updateType == updateTypeArr[0]):
+            pass #hay que ver cuanto se cura el pokemon cada cierto tiempo
+        elif (updateType == updateTypeArr[1]):
+            pokemonState.hp = pokemon.hp
+            pokemonState.attack = pokemon.attack
+            pokemonState.defense = pokemon.defense
+            pokemonState.specialAttack = pokemon.special_attack
+            pokemonState.specialDefense = pokemon.special_defense
+            pokemonState.speed = pokemon.speed
+            pokemonState.negEffect = None    #por ahora, es como si no tuviera efectos negativos, verificar luego en la base de datos
+            pokemonState.posEffect = None    #igual que efectos negativos
+        else:
+            if potion == 'curarParalisis':    #por ahora dejemoslo asi, luego seguro se creara una funcion para por cada pocion de la bd hacer el efecto indicado
+                pokemonState.negEffect = None
+            
+
+
+        
 
 def IndexToNature(nature):
     for i in range(len(natures_arr)):

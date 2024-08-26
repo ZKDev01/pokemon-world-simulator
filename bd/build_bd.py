@@ -1,5 +1,5 @@
 import pokebase as pb
-from pokemon_ import *
+from pokemon import *
 # from pokemon import Pokemon
 import tqdm
 

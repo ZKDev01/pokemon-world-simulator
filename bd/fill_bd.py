@@ -1,6 +1,6 @@
 import pokebase as pb
 import sqlite3
-from pokemon_ import *
+from pokemon import *
 
 conn = sqlite3.connect('pokedex.db')
 cursor = conn.cursor()
