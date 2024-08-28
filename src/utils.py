@@ -106,12 +106,13 @@ class PokemonState():
         self.speed = speed
 
 
-class Pokemon():
-    def __init__(self, id, name, height, weight, base_experience, growth_rate, generation, # todos estos stats son de tipo int exceptuando el growth_rate, la generation y el name
+class Pokemon():   # por ahora clase lista
+    def __init__(self, id, name, types, height, weight, base_experience, growth_rate, generation, # todos estos stats son de tipo int exceptuando el growth_rate, la generation y el name
                  hp, attack, defense, specialAttack, specialDefense, speed, lvl): 
                                                                                
         self.id = id
         self.name = name
+        self.type = types[random.randint(0,len(types))]
         self.base_experience = base_experience
         self.height = height
         self.weight = weight
@@ -136,7 +137,7 @@ class Pokemon():
         self.exp = self.exp_table[self.lvl - 1]['experience']
         self.next_exp_level = self.exp_table[self.lvl]['experience']    
 
-        indiv_values = [random.randint(0,31) for i in range(5)]     #los individual values son valores entre 0 y 31 que tiene cada pokemon aleatoriamente al crearse
+        indiv_values = [random.randint(0,31) for i in range(6)]     #los individual values son valores entre 0 y 31 que tiene cada pokemon aleatoriamente al crearse
                                                                     #comienza en hp y continua con la lista de stats de arriba
         #indiv_values es de la forma attack_defense_specialAttack_specialDefense_speed
         self.i_hp = indiv_values[0]
@@ -164,12 +165,12 @@ class Pokemon():
         # others = ((2*Base + IV + EV/4)/100)*Nivel + 5 
 
 
-        self.hp = hp           #primero para cada stat le asignamos su valor base, para luego 
-        self.attack = attack       #actualizarlo con el valor real, es seguro ya que se crea el pokemon una sola vez
-        self.defense = defense
-        self.special_attack = specialAttack
-        self.special_defense = specialDefense
-        self.speed = speed
+        self.b_hp = hp           #primero para cada stat le asignamos su valor base, para luego 
+        self.b_attack = attack       #actualizarlo con el valor real, es seguro ya que se crea el pokemon una sola vez
+        self.b_defense = defense
+        self.b_special_attack = specialAttack
+        self.b_special_defense = specialDefense
+        self.b_speed = speed     # b de base
 
         r = random.randint(0, len(natures_arr))
         self.nature = natures_arr[r]          #por ahora le asignaremos una naturaleza al encontrar el pokemon, ya sea
@@ -181,7 +182,7 @@ class Pokemon():
         self.SubirNivel(self.lvl)
 
         # inicializamos el estado actual del pokemon
-        self.actualState = PokemonState(self, self.types, self.lvl, None, None, self.hp, 
+        self.actualState = PokemonState(self, self.type, self.lvl, None, None, self.hp, 
                                         self.attack, self.defense, self.special_attack, self.special_defense, self.speed)  #pendiente a arreglar
 
 
@@ -190,21 +191,21 @@ class Pokemon():
 
     def SubirNivel(self, lvl):
         
-        self.hp = ((2*self.stats[0]['base_stat'] + self.i_hp + self.ev_hp/4)/100)*lvl + lvl + 10
-        self.attack = ((2*self.stats[1]['base_stat'] + self.i_hp + self.ev_attack/4)/100)*lvl + 5
-        self.defense = ((2*self.stats[2]['base_stat'] + self.i_defense + self.ev_defense/4)/100)*lvl + 5
-        self.special_attack = ((2*self.stats[3]['base_stat'] + self.i_specialAttack + self.ev_specialAttack/4)/100)*lvl + 5
-        self.special_defense = ((2*self.stats[4]['base_stat'] + self.i_specialDefense + self.ev_specialDefense/4)/100)*lvl + 5
-        self.speed = ((2*self.stats[5]['base_stat'] + self.i_speed + self.ev_speed/4)/100)*lvl + 5
+        self.hp = ((2*self.b_hp + self.i_hp + self.ev_hp/4)/100)*lvl + lvl + 10
+        self.attack = ((2*self.b_attack + self.i_hp + self.ev_attack/4)/100)*lvl + 5
+        self.defense = ((2*self.b_defense + self.i_defense + self.ev_defense/4)/100)*lvl + 5
+        self.special_attack = ((2*self.b_special_attack + self.i_specialAttack + self.ev_specialAttack/4)/100)*lvl + 5
+        self.special_defense = ((2*self.b_special_defense + self.i_specialDefense + self.ev_specialDefense/4)/100)*lvl + 5
+        self.speed = ((2*self.b_speed + self.i_speed + self.ev_speed/4)/100)*lvl + 5
 
         #aplicamos el porciento de la caracteristica nature del pokemon
         nature_index = IndexToNature(self.nature)
 
-        self.attack = self.attack * natures_matrix[nature_index][1]
-        self.defense = self.defense * natures_matrix[nature_index][2]
-        self.special_attack = self.special_attack * natures_matrix[nature_index][3]
-        self.special_defense = self.special_defense * natures_matrix[nature_index][4]
-        self.speed = self.speed * natures_matrix[nature_index][5]
+        self.attack = self.attack * natures_matrix[nature_index][0]
+        self.defense = self.defense * natures_matrix[nature_index][1]
+        self.special_attack = self.special_attack * natures_matrix[nature_index][2]
+        self.special_defense = self.special_defense * natures_matrix[nature_index][3]
+        self.speed = self.speed * natures_matrix[nature_index][4]
 
 
     # Actualiza los puntos de crecimiento del pokemon, se actualiza al terminar cada batalla
