@@ -1,7 +1,13 @@
 import sqlite3
 import requests
 import random
+import json
+
 from utils import *
+
+
+conn = sqlite3.connect('pokedex.db')
+cursor = conn.cursor()
 
 def get_pokemon_data(pokemon_id):
     url = f'https://pokeapi.co/api/v2/pokemon/{pokemon_id}'
@@ -11,40 +17,13 @@ def get_pokemon_data(pokemon_id):
     else:
         return None
     
-first_pokemon = get_pokemon_data(60)
-specie_url = first_pokemon['species']['url']
-specie = requests.get(specie_url)
-if specie.status_code == 200:
-    specie = specie.json()
-else:
-    pass
+cursor.execute(f'SELECT * FROM Pokemons WHERE id = {25}')
+pok = cursor.fetchall()[0]
 
-id = first_pokemon['id']
-name = first_pokemon['name']
-base_experience = first_pokemon['base_experience']
-height = first_pokemon['height']
-weight = first_pokemon['weight']
-abilities = first_pokemon['abilities']
-forms = first_pokemon['forms']
-held_items = first_pokemon['held_items']
-location_areas = first_pokemon['location_area_encounters']
-moves = first_pokemon['moves']
-past_types = first_pokemon['past_types']
-species = first_pokemon['species']
-stats = first_pokemon['stats']
-types = first_pokemon['types']
-lvl = 1
+id,name,height,weight,base_experience,growth_rate, generation, hp, attack, defense, specialAttack,specialDefense,speed,lvl = pok[0],pok[1],pok[2],pok[3],pok[4],pok[5],pok[6],pok[7],pok[8],pok[9],pok[10],pok[11],pok[12],random.randint(0,30)
 
-pokemon = Pokemon()
+pokemon = Pokemon(id, name, height, weight, base_experience, growth_rate, generation, hp, attack, defense,
+                  specialAttack, specialDefense, speed, lvl)
 
-print(first_pokemon)
 
-conn = sqlite3.connect('pokemon.db')
-cursor = conn.cursor()
 
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS pokemons(
-        id INTEGER PRIMARY KEY,
-        nombre TEXT NOT NULL,
-        
-    )''')

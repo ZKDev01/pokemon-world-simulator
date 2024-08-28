@@ -1,4 +1,5 @@
 from utils import *
+from move import *
 
 #    Los entrenadores son los contenedores de los pokemones, estos son los que tomaran decisiones en las batallas,
 # y los que recorreran el mapa en busca de los pokemones que estaran en el plan, los pokemones salvajes tendran
