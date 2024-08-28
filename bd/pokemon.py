@@ -149,8 +149,6 @@ class Move:
     
 class Evolution_chain:
     def __init__(self, id):
-        if all_evol.get_by_id(id):
-            return
         self.id = id
         chain = pb.evolution_chain(id)
         self.chain = Chain(chain.chain)
@@ -168,15 +166,15 @@ class Evolution_chain:
 class Chain:
     def __init__(self, chain):
         self.species = chain.species.name
-        self.details = self.get_details(chain)
+        self.details = self.set_details(chain)
         self.evolves_to = []
         for i in range(len(chain.evolves_to)):
             self.evolves_to.append(Chain(chain.evolves_to[i]))
         
         
-    def get_details(self, chain):
+    def set_details(self, chain):
         details = {}
-        names = ["gender", "held_item", "item", "known_move", "known_move_type", "location", "min_affection", "min_beauty", "min_happiness", "min_level", "needs_overworld_rain", "party_species", "party_type", "relative_physical_stats", "time_of_day", "trade_species", "trigger"]
+        names = ["gender", "held_item", "item", "known_move", "known_move_type", "location", "min_affection", "min_beauty", "min_happiness", "min_level", "needs_overworld_rain", "party_species", "party_type", "relative_physical_stats", "time_of_day", "trade_species", "turn_upside_down", "trigger"]
         if chain.evolution_details:
             evol_details = chain.evolution_details[0]
             for element in names:
@@ -190,24 +188,89 @@ class Chain:
             pokes += self.evolves_to[i].get_pokes()
         return pokes
     
-    def get_evol_details(self, poke):
-        if self.species == poke:
-            return self.details
-        else: 
-            for i in range(len(self.evolves_to)):
-                details = self.evolves_to[i].get_evol_details(poke)
-                if details:
-                    return details
-        return None
+    def get_chain_details(self):
+        return self.details
             
-    def __str__(self):
-        return self.print_chain()
-    
-    def print_chain(self, tab=1):
-        string = self.species
+    def get_evol_details(self, poke_name : str):
+        if self.species == poke_name:
+            return self.details
         for i in range(len(self.evolves_to)):
-            string += "\n" + "\t" * tab + "\__" + self.evolves_to[i].print_chain(tab + 1)
-        return string
+            if poke_name in self.evolves_to[i].get_pokes():
+                return self.evolves_to[i].get_evol_details(poke_name)
+        return None
+    
+class Location:
+    def __init__(self, id):
+        location = pb.location(id)
+        self.id = location.id
+        self.name = location.name
+        self.areas = self.get_areas(location)
+        all_locations.add_location(self)
+    
+    def get_areas(self, location):
+        areas = []
+        for i in range(len(location.areas)):
+            areas.append(Area(location.areas[i].name))
+        return areas
+
+class Area:
+    def __init__(self, name):
+        area = pb.location_area(name)
+        self.id = area.id
+        self.name = area.name
+        self.pokemons = self.get_pokes(area)
+    
+    def get_pokes(self, area):
+        pokes = []
+        for i in range(len(area.pokemon_encounters)):
+            pokes.append(Pokemon(area.pokemon_encounters[i].pokemon.name))
+        return pokes
+    
+class All_locations:
+    def __init__(self):
+        self.all_locations = []
+    
+    def add_location(self, location : Location):
+        if location not in self.all_locations:
+            self.all_locations.append(location)
+        
+    def get_names(self):
+        names = []
+        for i in range(len(self.all_locations)):
+            names.append(self.all_locations[i].name)
+        return names
+    
+    def get_by_name(self, name):
+        for i in range(len(self.all_locations)):
+            if self.all_locations[i].name == name:
+                return self.all_locations[i]
+        return None
+    
+    def get_by_id(self, id):
+        for i in range(len(self.all_locations)):
+            if self.all_locations[i].id == id:
+                return self.all_locations[i]
+        return None
+    
+    def get_all_locations(self):
+        return self.all_locations
+    
+    def __len__(self):
+        return len(self.all_locations)
+    
+    def __getitem__(self, key):
+        return self.all_locations[key]
+    
+    def __iter__(self):
+        self.current = 0
+        return self
+    
+    def __next__(self):
+        if self.current < len(self.all_locations):
+            self.current += 1
+            return self.all_locations[self.current - 1]
+        else:
+            raise StopIteration
     
 class All_moves:
     def __init__(self):

@@ -156,7 +156,72 @@ def fill_pokemon_held_items():
             INSERT INTO Pokemon_Held_Items(pokemon_id, item_id)
             VALUES(?,?)
             ''', (pokemon.id, item.id))
-            conn.commit()
+            conn.commit()           
+
+def get_evolutions():
+    for pokemon in all_pokes:
+        if all_evol.get_by_id(pokemon.evolution_chain_id):
+            continue
+        Evolution_chain(pokemon.evolution_chain_id)
+        
+def fill_evolutions():
+    for evol_chain in all_evol.get_all_evolutions():
+        
+        chain = evol_chain.chain
+        gender = chain.get_chain_details['gender']
+        if gender == 1: gender = 'female' 
+        if gender == 2: gender = 'male'
+        else: gender == 'genderless'
+        
+        held_item = chain.get_chain_details['held_item']
+        held_item = all_items.get_by_name(held_item)
+        
+        item = chain.get_chain_details['item']
+        item = all_items.get_by_name(item)
+        
+        known_move = chain.get_chain_details['known_move']
+        move = all_moves.get_by_name(known_move)
+        
+        known_move_type = chain.get_chain_details['known_move_type']
+        known_move_type = all_types.get_by_name(known_move_type)
+        
+        location = chain.get_chain_details['location']
+        min_affection = chain.get_chain_details['min_affection']
+        min_beauty = chain.get_chain_details['min_beauty']
+        min_happiness = chain.get_chain_details['min_happiness']
+        min_level = chain.get_chain_details['min_level']
+        needs_overworld_rain = chain.get_chain_details['needs_overworld_rain']
+        
+        party_species = chain.get_chain_details['party_species']
+        party_species = all_pokes.get_by_name(party_species)
+        
+        party_type = chain.get_chain_details['party_type']
+        party_type = all_types.get_by_name(party_type)
+        
+        relative_physical_stats = chain.get_chain_details['relative_physical_stats']
+        time_of_day = chain.get_chain_details['time_of_day']
+        
+        trade_species = chain.get_chain_details['trade_species']
+        trade_species = all_pokes.get_by_name(trade_species)
+        
+        turn_upside_down = chain.get_chain_details['turn_upside_down']
+        trigger = chain.get_chain_details['trigger']
+        
+        cursor.execute('''
+        INSERT INTO Evolutions(id, pokemon_id, gender, held_item_id, known_move_id, known_move_type_id, location_id, min_affection, min_beauty, min_happiness, min_level, needs_overworld_rain, party_species_id, party_type_id, relative_physical_stats, time_of_day, trade_species_id, turn_upside_down, trigger)
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ''', (evol_chain.id, chain.species.id, gender, held_item.id, item.id, move.id, known_move_type.id, location, min_affection, min_beauty, min_happiness, min_level, needs_overworld_rain, party_species.id, party_type.id, relative_physical_stats, time_of_day, trade_species.id, turn_upside_down, trigger))
+        conn.commit()
+        
+def fill_pokemon_evolutions():
+    
+        
+def get_locations():
+    for pokemon in all_pokes:
+        if all_locs.get_by_id(pokemon.location_area_encounters):
+            continue
+        Location_area_encounters(pokemon.location_area_encounters)
+
  #TODO: Fill locations and areas tables and evolution tables.
         
 

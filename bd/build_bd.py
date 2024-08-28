@@ -167,20 +167,19 @@ CREATE TABLE IF NOT EXISTS Pokemons_in_areas(
 )
 ''')
 
-#Create table Regions
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS Regions(
-    id INTEGER PRIMARY KEY,
-    name TEXT
-)
-''')
+# #Create table Regions
+# cursor.execute('''
+# CREATE TABLE IF NOT EXISTS Regions(
+#     id INTEGER PRIMARY KEY,
+#     name TEXT
+# )
+# ''')
 
 #Create table Evolution
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Evolution(
     id INTEGER PRIMARY KEY,
-    current_pokemon_id INTEGER,
-    evolved_pokemon_id INTEGER,
+    pokemon_id INTEGER,
     gender TEXT,
     held_item_id INTEGER,
     item_id INTEGER,
@@ -200,8 +199,7 @@ CREATE TABLE IF NOT EXISTS Evolution(
     turn_upside_down TEXT,
     trigger TEXT,
     
-    FOREIGN KEY(current_pokemon_id) REFERENCES Pokemons(id),
-    FOREIGN KEY(evolved_pokemon_id) REFERENCES Pokemons(id),
+    FOREIGN KEY(pokemon_id) REFERENCES Pokemons(id),
     FOREIGN KEY(held_item_id) REFERENCES Items(id),
     FOREIGN KEY(item_id) REFERENCES Items(id),
     FOREIGN KEY(known_move_id) REFERENCES Moves(id),
