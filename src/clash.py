@@ -1,4 +1,5 @@
 from Entrenador import *
+from move import *
 
 class Clash():
     def __init__(self, couch1:Couch, couch2:Couch):
@@ -28,10 +29,10 @@ class Clash():
                 couch1_turn = self.couch2
                 couch2_turn = self.couch1
             
-            couch1_move = couch1_turn.GetMove_at_Battle(couch1_turn.pokemonLider.actualState, couch2_turn.pokemonLider.actualState)
+            couch1_move:Move = couch1_turn.GetMove_at_Battle(couch1_turn.pokemonLider.actualState, couch2_turn.pokemonLider.actualState)
             register_moves.append(couch1_move)
 
-            couch2_move = couch2_turn.GetMove_at_Battle(couch2_turn.pokemonLider.actualState, couch1_turn.pokemonLider.actualState)
+            couch2_move:Move = couch2_turn.GetMove_at_Battle(couch2_turn.pokemonLider.actualState, couch1_turn.pokemonLider.actualState)
             register_moves.append(couch2_move)
 
                        
