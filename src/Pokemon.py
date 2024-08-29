@@ -140,7 +140,7 @@ class Pokemon():   # por ahora clase lista
 
     # Por implemetar
 
-    def UpdatePokemonState(self, pokemon, updateType, pokemonState:PokemonState=None, move=Move, potion=None): # pokemon es de Tipo Pokemon
+    def UpdatePokemonState(self, pokemon, updateType, pokemonState:PokemonState=None, move=None, potion=None): # pokemon es de Tipo Pokemon
 
             updateTypeArr = ['attack', 'home', 'potion', 'effects']
 
@@ -192,3 +192,34 @@ def AsignMoves(pokemon):
     
     return result
 
+
+
+
+
+
+
+
+
+
+
+class Move():
+    def __init__(self, name:str, power:int, pp:int, accuracy:int, type_id:int, category:str,
+                 ailment:str, target:str, effect):  # el efect esta en veremos de que tipo va a ser
+        
+        self.name = name
+        self.power = power
+        self.pp = pp
+        self.accuracy = accuracy
+        self.type_id = type_id
+        self.category = category
+        self.ailment = ailment
+        self.target = target
+        self.effect = effect
+
+    # Funcion que dependiendo del estado del pokemon que ataca, el estado del pokemon que recibe el ataque,
+    # el efecto del movimiento, los efectos positivos del atacante, los efectos negativos del que recibe el 
+    # ataque, entre otros, calcula el danio que recibira el pokemon atacado, asi como los efectos negativos
+    # que podria desarrollar, asi como los efectos positivos que podria desarrollar el atacante
+
+    def GetDamage(self, pokemonState1:PokemonState, pokemonState2:PokemonState):
+        pass

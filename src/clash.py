@@ -1,5 +1,4 @@
 from Entrenador import *
-from move import *
 
 class Clash():
     def __init__(self, couch1:Couch, couch2:Couch):

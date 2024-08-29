@@ -4,10 +4,33 @@ import random
 import json
 
 from utils import *
+from Pokemon import *
 
 
 conn = sqlite3.connect('pokedex.db')
 cursor = conn.cursor()
+
+#cursor.execute(f'DROP TABLE Effects')
+
+#cursor.execute('''CREATE TABLE IF NOT EXISTS Effects (
+#                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+#                    effect TEXT NOT NULL
+#               )''')
+
+#conn.commit()
+
+cursor.execute('SELECT effect FROM Moves')
+effects_at_db = cursor.fetchall()
+
+effects = []
+
+for effect_db in effects_at_db:
+    effect_ = effect_db[0]
+    if effect_ not in effects:
+        effects.append(effect_)
+        cursor.execute('''INSERT INTO Effects(effect) VALUES(?)''', (effect_,))
+
+conn.commit()
 
 def get_pokemon_data(pokemon_id):
     url = f'https://pokeapi.co/api/v2/pokemon/{pokemon_id}'

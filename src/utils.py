@@ -1,7 +1,7 @@
 import random
 import sqlite3
 import json
-from move import *
+#from move import *
 
 conn = sqlite3.connect('pokedex.db')
 cursor = conn.cursor()
