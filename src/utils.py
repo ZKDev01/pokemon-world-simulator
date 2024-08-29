@@ -226,27 +226,16 @@ class Pokemon():   # por ahora clase lista
 
 
 
-    # Por implementar (devuelve la tabla de nivel-cantidad de experiencia necesaria para subir al proximo nivel)
-    def GetExpTable(self, growth_rate):
-        return growth_rate
-
-
 # Actualiza el estado del pokemon para el combate, ejemplo se actualiza cada cierto tiempo, 
 # cada cierto tiempo el pokemon se cura, o cuando se le proporciona una pocion curativa o algo parecido
-
-
-
-
 
     # Por implemetar
 
     def UpdatePokemonState(self, pokemon, updateType, pokemonState:PokemonState=None, move=Move, potion=None): # pokemon es de Tipo Pokemon
 
-            updateTypeArr = ['time', 'attack', 'home', 'potion', 'effects']
+            updateTypeArr = ['attack', 'home', 'potion', 'effects']
 
-            if (updateType == updateTypeArr[0]):
-                pass #hay que ver cuanto se cura el pokemon cada cierto tiempo
-            elif (updateType == updateTypeArr[1]):
+            if (updateType == updateTypeArr[1]):
                 pass           # entonces estamos seguros de que se proporciono un movimiento y un estado de pokemon, que seria el estado del pokemon contrari
             
             elif (updateType == updateTypeArr[2]):
