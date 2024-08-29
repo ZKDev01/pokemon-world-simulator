@@ -136,33 +136,12 @@ CREATE TABLE IF NOT EXISTS Locations(
 )
 ''')
 
-#Create table Areas
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS Areas(
-    id INTEGER PRIMARY KEY,
-    name TEXT,
-    location_id INTEGER
-)
-''')
-
 #Create table Areas_in_Location
 cursor.execute('''
-CREATE TABLE IF NOT EXISTS Areas_in_Location(
+CREATE TABLE IF NOT EXISTS Areas(
     location_id INTEGER,
     area_id INTEGER,
     FOREIGN KEY(location_id) REFERENCES Locations(id),
-    FOREIGN KEY(area_id) REFERENCES Areas(id)
-)
-''')
-
-#Create table Pokemons_in_areas
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS Pokemons_in_areas(
-    pokemon_id INTEGER,
-    area_id INTEGER,
-    capture_method TEXT,
-    capture_rate INTEGER,
-    FOREIGN KEY(pokemon_id) REFERENCES Pokemons(id),
     FOREIGN KEY(area_id) REFERENCES Areas(id)
 )
 ''')
@@ -221,5 +200,40 @@ CREATE TABLE IF NOT EXISTS Pokemon_Evolution(
 )
 ''') 
 
+#Create table Encounter_Method
+#TODO: COMPLETAR
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS Encounter_Methods(
+    id INTEGER PRIMARY KEY,
+    name TEXT
+)
+''')
+
+#Create table Pokemon_Encounter
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS Pokemon_Encounter(
+    pokemon_id INTEGER,
+    area_id INTEGER,
+    encounter_method_id INTEGER,
+    min_level INTEGER,
+    max_level INTEGER,
+    chance INTEGER,
+    FOREIGN KEY(pokemon_id) REFERENCES Pokemons(id),
+    FOREIGN KEY(area_id) REFERENCES Areas(id),
+    FOREIGN KEY(encounter_method_id) REFERENCES Encounter_Methods(id)
+)
+''')
+
+#Create table AreaXEncounter_Method
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS AreaXEncounter_Method(
+    area_id INTEGER,
+    encounter_method_id INTEGER,
+    rate INTEGER,
+    FOREIGN KEY(area_id) REFERENCES Areas(id),
+    FOREIGN KEY(encounter_method_id) REFERENCES Encounter_Methods(id)
+)
+''')
+               
 conn.close()
 

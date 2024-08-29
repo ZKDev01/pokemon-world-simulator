@@ -154,6 +154,9 @@ class Evolution_chain:
         self.chain = Chain(chain.chain)
         all_evol.add_evolution(self)
         
+    def get_chain(self):
+        return self.chain
+    
     def __str__(self):
         return str(self.chain)
     
@@ -165,12 +168,12 @@ class Evolution_chain:
 
 class Chain:
     def __init__(self, chain):
+        self.id = chain.species.id
         self.species = chain.species.name
         self.details = self.set_details(chain)
         self.evolves_to = []
         for i in range(len(chain.evolves_to)):
             self.evolves_to.append(Chain(chain.evolves_to[i]))
-        
         
     def set_details(self, chain):
         details = {}
@@ -187,6 +190,14 @@ class Chain:
         for i in range(len(self.evolves_to)):
             pokes += self.evolves_to[i].get_pokes()
         return pokes
+    
+    def get_next_evols(self, poke_name : str):
+        if self.species == poke_name:
+            return self.evolves_to
+        for i in range(len(self.evolves_to)):
+            if poke_name in self.evolves_to[i].get_pokes():
+                return self.evolves_to[i].get_next_evols(poke_name)
+        return None
     
     def get_chain_details(self):
         return self.details
@@ -205,12 +216,18 @@ class Location:
         self.id = location.id
         self.name = location.name
         self.areas = self.get_areas(location)
+        self.region = location.region.id
         all_locations.add_location(self)
     
     def get_areas(self, location):
         areas = []
         for i in range(len(location.areas)):
-            areas.append(Area(location.areas[i].name))
+            encounter_methods = location.areas[i].encounter_method_rates
+            for j in range(len(encounter_methods)):
+                for k in range(len(encounter_methods[j].version_details)):
+                    if encounter_methods[j].version_details[k].version.name == "firered":
+                        areas.append(Area(location.areas[i].name))
+                        break
         return areas
 
 class Area:
@@ -218,14 +235,94 @@ class Area:
         area = pb.location_area(name)
         self.id = area.id
         self.name = area.name
-        self.pokemons = self.get_pokes(area)
+        self.encounter_methods = self.set_encounter_methods(area)
+        self.pokemon_encounters = self.set_pokemon_enc_rates(area)
     
-    def get_pokes(self, area):
-        pokes = []
+    def set_encounter_methods(self, area):
+        encounters = {}
+        for i in range(len(area.encounter_method_rates)):
+            for k in range(len(area.encounter_method_rates[i].version_details)):
+                if area.encounter_method_rates[i].version_details[k].version.name == "firered":
+                    encounter_method = Encounter_method(area.encounter_method_rates[i].encounter_method.name)
+                    encounters[encounter_method.name] = area.encounter_method_rates[i].version_details[k].rate
+                    break
+        return encounters
+    
+    def set_pokemon_enc_rates(self, area):
+        pokemon_enc = []
         for i in range(len(area.pokemon_encounters)):
-            pokes.append(Pokemon(area.pokemon_encounters[i].pokemon.name))
-        return pokes
+            for j in range(len(area.pokemon_encounters[i].version_details)):
+                    if area.pokemon_encounters[i].version_details[j].version.name == "firered":
+                        pokemon_enc.append(Pokemon_encounters(self, area.pokemon_encounters[i], area.pokemon_encounters[i].version_details[j]))
+                        break
+        return pokemon_enc
+        
+#Un pokemon encounter es un pokemon que se puede encontrar en un area con un metodo de encuentro, con una probabilidad de encuentro.
+class Pokemon_encounters:
+    def __init__(self, area, encounter, enc_details):
+        self.pokemon = encounter.pokemon.name
+        self.area = area.id
+        self.encounter_method = enc_details.encounter_details[0].method.id
+        self.rate = enc_details.encounter_details[0].chance
+        self.min_level = enc_details.encounter_details[0].min_level
+        self.max_level = enc_details.encounter_details[0].max_level
+        
+    def __str__(self):
+        return self.pokemon + " can be found in " + self.area + " with a " + self.rate + " rate using the " + self.encounter_method + " method."
     
+class Encounter_method:
+    def __init__(self, name):
+        encounter_method = pb.encounter_method(name)
+        self.id = encounter_method.id
+        self.name = encounter_method.name
+        all_enc_methods.add_encounter_method(self)
+    
+class All_encounter_methods:
+    def __init__(self):
+        self.all_encounter_methods = []
+    
+    def add_encounter_method(self, encounter_method : Encounter_method):
+        if encounter_method not in self.all_encounter_methods:
+            self.all_encounter_methods.append(encounter_method)
+        
+    def get_names(self):
+        names = []
+        for i in range(len(self.all_encounter_methods)):
+            names.append(self.all_encounter_methods[i].name)
+        return names
+    
+    def get_by_name(self, name):
+        for i in range(len(self.all_encounter_methods)):
+            if self.all_encounter_methods[i].name == name:
+                return self.all_encounter_methods[i]
+        return None
+    
+    def get_by_id(self, id):
+        for i in range(len(self.all_encounter_methods)):
+            if self.all_encounter_methods[i].id == id:
+                return self.all_encounter_methods[i]
+        return None
+    
+    def get_all_encounter_methods(self):
+        return self.all_encounter_methods
+    
+    def __len__(self):
+        return len(self.all_encounter_methods)
+    
+    def __getitem__(self, key):
+        return self.all_encounter_methods[key]
+    
+    def __iter__(self):
+        self.current = 0
+        return self
+    
+    def __next__(self):
+        if self.current < len(self.all_encounter_methods):
+            self.current += 1
+            return self.all_encounter_methods[self.current - 1]
+        else:
+            raise StopIteration
+        
 class All_locations:
     def __init__(self):
         self.all_locations = []
@@ -317,8 +414,7 @@ class All_moves:
             return self.all_moves[self.current - 1]
         else:
             raise StopIteration
-        
-    
+         
 class All_items:
     def __init__(self):
         self.all_items = []
@@ -590,3 +686,5 @@ all_types = All_types()
 all_abilities = All_abilities()
 all_egg_groups = All_egg_groups()
 all_evol = All_evolutions()
+all_locations = All_locations()
+all_enc_methods = All_encounter_methods()
