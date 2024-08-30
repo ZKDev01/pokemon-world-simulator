@@ -43,7 +43,7 @@ natures_arr = ['hardly','bold','modest','calm','timid','lonely','docile','mild',
            'adamant','impish','bashful','careful','jolly','naughty','lax','rash','quirky',
            'naive','brave','relaxed','quiet','sassy','serious']
 
-#   Ataque     Defensa  AtEspecial DefEspecial     Velocidad                (en este caso no esta el hp, luego el hp estara de primero en la lista de stats)
+#   Ataque     Defensa  AtEspecial DefEspecial     Velocidad                (en este caso no esta el hp, luego el hp estará de primero en la lista de stats)
 #hardly
 #bold
 #...
@@ -125,3 +125,15 @@ def OrderByLearnedAtLvl(pokemon_moves_at_lvl:list):
         return result[-4:]
     
 
+# prioridad de las acciones y movimientos, se toma como other el resto de los movimientos, que luego se 
+# verificara como que el movimiento no se encuentre en el diccionario, para ahorrar tiempo, ya que se trabajará
+# solamente con la primera generación
+
+prioridad_de_acciones = {
+    'cambiar pokemon':2,
+    'usar objeto':2,
+    'huir':2,
+    'quick-attack':1,
+    'other':0,
+    'counter':-1
+}

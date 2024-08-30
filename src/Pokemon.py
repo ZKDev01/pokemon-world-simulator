@@ -47,7 +47,7 @@ class Pokemon():   # por ahora clase lista
         self.next_exp_level = self.exp_table[self.lvl]['experience']    
 
         indiv_values = [random.randint(0,31) for i in range(6)]     #los individual values son valores entre 0 y 31 que tiene cada pokemon aleatoriamente al crearse
-                                                                    #comienza en hp y continua con la lista de stats de arriba
+                                                                    #comienza en hp y continúa con la lista de stats de arriba
         #indiv_values es de la forma attack_defense_specialAttack_specialDefense_speed
         self.i_hp = indiv_values[0]
         self.ev_hp = 0
@@ -69,7 +69,7 @@ class Pokemon():   # por ahora clase lista
 
         #Para determinar los stats de un pokemon salvaje encontrado hay que tener en cuenta diferentes factores como son
         #el nivel, valores individuales(IVs), naturaleza(firme por ejemplo), valores de esfuerzo(en un pokemon salvaje 
-        #generalmente son 0. Los valores individuales varian entre cada tipo de pokemon de 0 hasta 31)
+        #generalmente son 0. Los valores individuales varían entre cada tipo de pokemon de 0 hasta 31)
         # HP = ((2*Base + IV + EV/4)/100)*lvl + lvl + 10
         # others = ((2*Base + IV + EV/4)/100)*Nivel + 5 
 
@@ -85,7 +85,7 @@ class Pokemon():   # por ahora clase lista
         self.nature = natures_arr[r]          #por ahora le asignaremos una naturaleza al encontrar el pokemon, ya sea
                                           #que este en lvl 1 o lvl 100
 
-        #aqui no tendremos en cuenta los efforts values, que se obtienen al derrotar otros pokemones
+        #aquí no se tendrá en cuenta los efforts values, que se obtienen al derrotar otros pokemones
         #ya que los que al inicializar un pokemon estos son salvajes
 
         self.SubirNivel(self.lvl)
@@ -95,7 +95,7 @@ class Pokemon():   # por ahora clase lista
                                         self.attack, self.defense, self.special_attack, self.special_defense, self.speed)  #pendiente a arreglar
 
 
-    # Se efectua al inicializar el pokemon y cada vez que este sube de nivel,
+    # Se efectúa al inicializar el pokemon y cada vez que este sube de nivel,
     # actualiza los stats
 
     def SubirNivel(self, lvl):
@@ -107,7 +107,7 @@ class Pokemon():   # por ahora clase lista
         self.special_defense = ((2*self.b_special_defense + self.i_specialDefense + self.ev_specialDefense/4)/100)*lvl + 5
         self.speed = ((2*self.b_speed + self.i_speed + self.ev_speed/4)/100)*lvl + 5
 
-        #aplicamos el porciento de la caracteristica nature del pokemon
+        #aplicamos el porciento de la característica nature del pokemon
         nature_index = IndexToNature(self.nature)
 
         self.attack = self.attack * natures_matrix[nature_index][0]
@@ -125,7 +125,7 @@ class Pokemon():   # por ahora clase lista
             self.lvl += 1
             self.next_exp_level = self.exp_table[self.lvl]['experience']
             self.SubirNivel(self.lvl)
-            # pendiente si llega a un nivel en que puede aprender un mivimiento nuevo o si puede evolucionar
+            # pendiente si llega a un nivel en que puede aprender un movimiento nuevo o si puede evolucionar
         self.ev_hp += ev_hp
         self.ev_attack += ev_attack
         self.ev_defense += ev_defense
@@ -136,7 +136,7 @@ class Pokemon():   # por ahora clase lista
 
 
 # Actualiza el estado del pokemon para el combate, ejemplo se actualiza cada cierto tiempo, 
-# cada cierto tiempo el pokemon se cura, o cuando se le proporciona una pocion curativa o algo parecido
+# cada cierto tiempo el pokemon se cura, o cuando se le proporciona una poción curativa o algo parecido
 
     # Por implemetar
 
@@ -145,7 +145,7 @@ class Pokemon():   # por ahora clase lista
             updateTypeArr = ['attack', 'home', 'potion', 'effects']
 
             if (updateType == updateTypeArr[1]):
-                pass           # entonces estamos seguros de que se proporciono un movimiento y un estado de pokemon, que seria el estado del pokemon contrari
+                pass           # entonces estamos seguros de que se proporcionó un movimiento y un estado de pokemon, que sería el estado del pokemon contrario
             
             elif (updateType == updateTypeArr[2]):
                 pokemonState.hp = pokemon.hp
@@ -157,7 +157,7 @@ class Pokemon():   # por ahora clase lista
                 pokemonState.negEffect = None    #por ahora, es como si no tuviera efectos negativos, verificar luego en la base de datos
                 pokemonState.posEffect = None    #igual que efectos negativos
             else:
-                if potion == 'curarParalisis':    #por ahora dejemoslo asi, luego seguro se creara una funcion para por cada pocion de la bd hacer el efecto indicado
+                if potion == 'curarParalisis':    #por ahora dejémoslo así, luego seguro se creará una función para por cada pocion de la bd hacer el efecto indicado
                     pokemonState.negEffect = None
             
 def AsignMoves(pokemon):
@@ -177,7 +177,7 @@ def AsignMoves(pokemon):
         else:
             pokemon_moves_at_lvl.append(pokemon_moves[i])
 
-    # ordenamos en orden ascendente segun el lvl y nos quedamos con los 4 ultimos
+    # ordenamos en orden ascendente según el lvl y nos quedamos con los 4 últimos
     pokemon_moves_at_lvl = OrderByLearnedAtLvl(pokemon_moves_at_lvl)
 
     for i in range(len(pokemon_moves_at_lvl)):
@@ -216,10 +216,10 @@ class Move():
         self.target = target
         self.effect = effect
 
-    # Funcion que dependiendo del estado del pokemon que ataca, el estado del pokemon que recibe el ataque,
+    # Función que dependiendo del estado del pokemon que ataca, el estado del pokemon que recibe el ataque,
     # el efecto del movimiento, los efectos positivos del atacante, los efectos negativos del que recibe el 
-    # ataque, entre otros, calcula el danio que recibira el pokemon atacado, asi como los efectos negativos
-    # que podria desarrollar, asi como los efectos positivos que podria desarrollar el atacante
+    # ataque, entre otros, calcula el daño que recibirá el pokemon atacado, asi como los efectos negativos
+    # que podría desarrollar, así como los efectos positivos que podría desarrollar el atacante
 
     def GetDamage(self, pokemonState1:PokemonState, pokemonState2:PokemonState):
         pass
