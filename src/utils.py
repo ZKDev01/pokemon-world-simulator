@@ -100,7 +100,11 @@ def IndexToStat(stat):
             return i
     raise ValueError(f'no hay stat de tipo {stat}')
 
-
+def IndexToType(type):
+    for i in range(len(types_arr)):
+        if type == types_arr[i]:
+            return i
+    raise ValueError('el type proporcionado no existe')
 
 
 def OrderByLearnedAtLvl(pokemon_moves_at_lvl:list):
@@ -125,6 +129,36 @@ def OrderByLearnedAtLvl(pokemon_moves_at_lvl:list):
         return result[-4:]
     
 
+# fórmula para calcular el daño ocasionado por un ataque basándose en los stats de los pokemones
+
+def GetDamage(move, attacker_pokemon_state, attacked_pokemon_state):  # Tipos: (Move, PokemonState, PokemonState)
+    move_power = move.power
+    atker_lvl = attacked_pokemon_state.lvl
+    move_category = move.category
+
+    atker_stat = attacker_pokemon_state.attack if move_category == 'physical' else attacker_pokemon_state.specialAttack
+    atked_stat = attacked_pokemon_state.defense if move_category == 'physical' else attacked_pokemon_state.specialDefense
+
+    move_type = move.type
+    atked_pok_type = attacked_pokemon_state.type
+    
+    move_type_index = IndexToType(move_type)
+    atked_pok_type_index = IndexToType(atked_pok_type)
+
+    type_mod = types_matrix[move_type_index][atked_pok_type_index]   # modificador de daño con respecto al tipo de mov y el tipo de pokemon atacado
+
+    stab_mod = 1.5 if attacker_pokemon_state.type == move_type else 1  # si el tipo del pokemon atacante coincide con el tipo de movimiento entonces se aplica bonificación
+
+    r = random.randint(1, 16)
+    criticat_mod = 2 if r == 1 else 1   # la probabilidad de critico es 1 en 16, aplica el doble de daño en rojo fuego
+    
+    aleatory_mod = random.uniform(0.85, 1.00)
+
+
+    result = (((atker_lvl*2/5 + 2) * move_power * (atker_stat/atked_stat)) / 50 + 2) * type_mod * stab_mod * criticat_mod * aleatory_mod
+
+    return result
+
 # prioridad de las acciones y movimientos, se toma como other el resto de los movimientos, que luego se 
 # verificara como que el movimiento no se encuentre en el diccionario, para ahorrar tiempo, ya que se trabajará
 # solamente con la primera generación
@@ -137,3 +171,34 @@ prioridad_de_acciones = {
     'other':0,
     'counter':-1
 }
+
+# estados efímeros: se padecen solo estando en combate
+ephemeral_states = ['confuso', 'enamorado', 'drenado', 'maldito', 'canto maldito', 'atrapado']
+
+# estados persistentes: se padecen incluso fuera de combate
+persistent_states = ['paralizado', 'quemado', 'envenenado', 'gravemente envenenado', 'dormido', 'congelado']
+
+# tipos de efectos que hay:
+# 1. afectan los stats del pokemon
+# 2. afectan a si ejecuta un movimiento o no
+# 3. inducen al adversario o a el mismo a un efecto negativo o positivo respectivamente
+# 4. reducen o aumentan la vida del pokemon(no se incluye en los stats porque esto ocuerre al final del turno)
+
+# 1. Afectan stats:
+
+def confuso(pokemon):
+    pass
+
+
+
+# las condiciones de estado tendrán un tipo, que determinará cual de las funciones va a activar, dependiendo de como se 
+# definan, por ejemplo parálisis determina si el pokemon se va a move cuando le toque atacar, mientras que si tiene algún
+# efecto que le reduzca stats se activa otro efecto y al iniciar el turno
+
+class ConditionState():
+    def __init__(self, name, type, pokemon):
+        self.name = name
+        self.type = type
+    
+    def ActivateEffect(self, pokemon):
+        pass

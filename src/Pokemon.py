@@ -1,12 +1,15 @@
 from utils import *
 
+
+        
+
 class PokemonState():
-    def __init__(self, pokemon, type, lvl, negEffect, posEffect, hp, attack, defense, specialAttack, specialDefense, speed):    #aqui negEffect(Paralisis, etc) posEffect(Pociones, etc)
+    def __init__(self, pokemon, type, lvl, hp, attack, defense, specialAttack, specialDefense, speed):    #aqui negEffect(Paralisis, etc) posEffect(Pociones, etc)
         self.pokemon = pokemon
         self.type = type
         self.lvl = lvl
-        self.negEffect = negEffect
-        self.posEffect = posEffect
+        self.negEffect = []   # serán del tipo ConditionState
+        self.posEffect = []
         self.hp = hp
         self.attack = attack
         self.defense = defense
@@ -91,7 +94,7 @@ class Pokemon():   # por ahora clase lista
         self.SubirNivel(self.lvl)
 
         # inicializamos el estado actual del pokemon
-        self.actualState = PokemonState(self, self.type, self.lvl, None, None, self.hp, 
+        self.actualState = PokemonState(self, self.type, self.lvl, self.hp, 
                                         self.attack, self.defense, self.special_attack, self.special_defense, self.speed)  #pendiente a arreglar
 
 
@@ -203,14 +206,14 @@ def AsignMoves(pokemon):
 
 
 class Move():
-    def __init__(self, name:str, power:int, pp:int, accuracy:int, type_id:int, category:str,
+    def __init__(self, name:str, power:int, pp:int, accuracy:int, type:str, category:str,
                  ailment:str, target:str, effect):  # el efect esta en veremos de que tipo va a ser
         
         self.name = name
         self.power = power
         self.pp = pp
         self.accuracy = accuracy
-        self.type_id = type_id
+        self.type = type
         self.category = category
         self.ailment = ailment
         self.target = target

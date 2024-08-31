@@ -23,13 +23,22 @@ class Clash():
 
             if couch1_pokemon.actualState.speed > couch2_pokemon.actualState.speed:
                 couch1_turn = self.couch1
+                whait_move_couch1 = []
+
                 couch2_turn = self.couch2
+                whait_move_couch2 = []
             else:
                 couch1_turn = self.couch2
+                whait_move_couch2 = []
+
                 couch2_turn = self.couch1
-            
-            couch1_move:Move = couch1_turn.GetMove_at_Battle(couch1_turn.pokemonLider.actualState, couch2_turn.pokemonLider.actualState)
-            register_moves.append(couch1_move)
+                whait_move_couch1 = []
+
+            if len(whait_move_couch1) == 0:
+                couch1_move:Move = couch1_turn.GetMove_at_Battle(couch1_turn.pokemonLider.actualState, couch2_turn.pokemonLider.actualState)
+                register_moves.append(couch1_move)
+            else:
+                pass
 
             couch2_move:Move = couch2_turn.GetMove_at_Battle(couch2_turn.pokemonLider.actualState, couch1_turn.pokemonLider.actualState)
             register_moves.append(couch2_move)
@@ -40,12 +49,12 @@ class Clash():
 
     # verifica si alguno de los dos entrenadores no le quedan pokemones para seguir el combate
     def VerifyEndToClash(self):
-        couch1_end = 1   # 0 si el equipo del couch1 puede continuar, 1 si el equipo del couch1 esta desmayado
+        couch1_end = 1   # 0 si el equipo del couch1 puede continuar, 1 si el equipo del couch1 está desmayado
 
         couch1_deck = self.couch1.deck
         for i in range(len(couch1_deck)):
             pokemon = couch1_deck[i]
-            if pokemon.actualState.hp > 0:   # cada pokemon tiene la caracteristica actualState que le da su situacion actual 
+            if pokemon.actualState.hp > 0:   # cada pokemon tiene la característica actualState que le da su situación actual 
                 couch1_end = 0
                 break
         
