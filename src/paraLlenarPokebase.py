@@ -1,7 +1,36 @@
 import sqlite3
 import requests
 import random
+import json
+
 from utils import *
+from Pokemon import *
+
+
+conn = sqlite3.connect('pokedex.db')
+cursor = conn.cursor()
+
+#cursor.execute(f'DROP TABLE Effects')
+
+#cursor.execute('''CREATE TABLE IF NOT EXISTS Effects (
+#                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+#                    effect TEXT NOT NULL
+#               )''')
+
+#conn.commit()
+
+cursor.execute('SELECT effect FROM Moves')
+effects_at_db = cursor.fetchall()
+
+effects = []
+
+for effect_db in effects_at_db:
+    effect_ = effect_db[0]
+    if effect_ not in effects:
+        effects.append(effect_)
+        cursor.execute('''INSERT INTO Effects(effect) VALUES(?)''', (effect_,))
+
+conn.commit()
 
 def get_pokemon_data(pokemon_id):
     url = f'https://pokeapi.co/api/v2/pokemon/{pokemon_id}'
@@ -11,40 +40,22 @@ def get_pokemon_data(pokemon_id):
     else:
         return None
     
-first_pokemon = get_pokemon_data(60)
-specie_url = first_pokemon['species']['url']
-specie = requests.get(specie_url)
-if specie.status_code == 200:
-    specie = specie.json()
-else:
-    pass
+cursor.execute(f'SELECT * FROM Pokemons WHERE id = {25}')
+pok = cursor.fetchall()[0]
 
-id = first_pokemon['id']
-name = first_pokemon['name']
-base_experience = first_pokemon['base_experience']
-height = first_pokemon['height']
-weight = first_pokemon['weight']
-abilities = first_pokemon['abilities']
-forms = first_pokemon['forms']
-held_items = first_pokemon['held_items']
-location_areas = first_pokemon['location_area_encounters']
-moves = first_pokemon['moves']
-past_types = first_pokemon['past_types']
-species = first_pokemon['species']
-stats = first_pokemon['stats']
-types = first_pokemon['types']
-lvl = 1
+cursor.execute(f'SELECT type_id FROM Pokemon_Types WHERE pokemon_id = {25}')
+types_id = cursor.fetchall()
 
-pokemon = Pokemon()
+pok_types = []
+for i in range(len(types_id)):
+    cursor.execute(f'SELECT name FROM Types WHERE id = {types_id[i][0]}')
+    type = cursor.fetchall()[0][0]
+    pok_types.append(type)
 
-print(first_pokemon)
+id,name,height,weight,base_experience,growth_rate, generation, hp, attack, defense, specialAttack,specialDefense,speed,lvl = pok[0],pok[1],pok[2],pok[3],pok[4],pok[5],pok[6],pok[7],pok[8],pok[9],pok[10],pok[11],pok[12],random.randint(1,30)
 
-conn = sqlite3.connect('pokemon.db')
-cursor = conn.cursor()
+pokemon = Pokemon(id, name, pok_types, height, weight, base_experience, growth_rate, generation, hp, attack, defense,
+                  specialAttack, specialDefense, speed, lvl)
 
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS pokemons(
-        id INTEGER PRIMARY KEY,
-        nombre TEXT NOT NULL,
-        
-    )''')
+
+
