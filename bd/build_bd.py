@@ -136,15 +136,25 @@ CREATE TABLE IF NOT EXISTS Locations(
 )
 ''')
 
-#Create table Areas_in_Location
+#Create table Areas
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS Areas(
+    id INTEGER PRIMARY KEY,
+    name TEXT,
     location_id INTEGER,
-    area_id INTEGER,
-    FOREIGN KEY(location_id) REFERENCES Locations(id),
-    FOREIGN KEY(area_id) REFERENCES Areas(id)
+    FOREIGN KEY(location_id) REFERENCES Locations(id)
 )
 ''')
+
+# #Create table Areas_in_Location
+# cursor.execute('''
+# CREATE TABLE IF NOT EXISTS AreasXLocation(
+#     location_id INTEGER,
+#     area_id INTEGER,
+#     FOREIGN KEY(location_id) REFERENCES Locations(id),
+#     FOREIGN KEY(area_id) REFERENCES Areas(id)
+# )
+# ''')
 
 # #Create table Regions
 # cursor.execute('''
@@ -159,34 +169,26 @@ cursor.execute('''
 CREATE TABLE IF NOT EXISTS Evolution(
     id INTEGER PRIMARY KEY,
     pokemon_id INTEGER,
-    gender TEXT,
-    held_item_id INTEGER,
-    item_id INTEGER,
-    known_move_id INTEGER,
-    known_move_type_id INTEGER,
-    location_id INTEGER,
+    gender INTEGER,
+    held_item TEXT,
+    item TEXT,
+    known_move TEXT,
+    known_move_type TEXT,
+    location TEXT,
     min_affection INTEGER,
     min_beauty INTEGER,
     min_happiness INTEGER,
-    min_level,
+    min_level INTEGER,
     needs_overworld_rain TEXT,
-    party_species_id INTEGER,
-    party_type_id INTEGER,
+    party_species TEXT,
+    party_type TEXT,
     relative_physical_stats INTEGER,
     time_of_day TEXT,
-    trade_species_id INTEGER,
+    trade_species TEXT,
     turn_upside_down TEXT,
     trigger TEXT,
     
-    FOREIGN KEY(pokemon_id) REFERENCES Pokemons(id),
-    FOREIGN KEY(held_item_id) REFERENCES Items(id),
-    FOREIGN KEY(item_id) REFERENCES Items(id),
-    FOREIGN KEY(known_move_id) REFERENCES Moves(id),
-    FOREIGN KEY(known_move_type_id) REFERENCES Types(id),
-    FOREIGN KEY(location_id) REFERENCES Locations(id),
-    FOREIGN KEY(party_species_id) REFERENCES Pokemons(id),
-    FOREIGN KEY(party_type_id) REFERENCES Types(id),
-    FOREIGN KEY(trade_species_id) REFERENCES Pokemons(id)
+    FOREIGN KEY(pokemon_id) REFERENCES Pokemons(id)
 )
 ''')
        

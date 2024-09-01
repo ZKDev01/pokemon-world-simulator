@@ -3,55 +3,99 @@ import sqlite3
 import tqdm
 from pokemon import *
 
-REGIONS = [1] 
+REGIONS = [1]
+GENERATIONS = [1] 
+EXCLUDED_POKES = ['deoxys', 'happiny']
 
 conn = sqlite3.connect('pokedex.db')
 cursor = conn.cursor()
 
+# def colect_data():
+#     for gen in GENERATIONS:
+#         generation = pb.generation(gen)
+#         for i in tqdm.tqdm(range(len(generation.pokemon_species))):
+#             Pokemon(generation.pokemon_species[i].name)#Con Pokemon tengo Abilities, EggGroups, algunos Moves, algunos Types
+#         for i in tqdm.tqdm(range(len(generation.moves))):
+#             if generation.moves[i].name in all_moves.get_names():
+#                 continue
+#             Move(generation.moves[i].name)
+#         for i in tqdm.tqdm(range(len(generation.types))):
+#             if generation.types[i].name in all_types.get_names():
+#                 continue
+#             Type(generation.types[i].name)
+
 #region get methods
-def get_all_pokemons():
+def get_all_pokemons(total = 1302):
     #Get all pokes that belong to versions firered and leafgreen
-    for i in tqdm.tqdm(range(1, 152)):
+    for i in tqdm.tqdm(range(1, total)):#1302
         if all_pokes.get_by_id(i):
             continue
-        Pokemon(i)
+        try:
+            poke = pb.pokemon(i)
+            if poke.species.name in EXCLUDED_POKES:
+                continue
+            flavor_text_entries = poke.species.flavor_text_entries
+            for i in range(len(flavor_text_entries)):
+                if flavor_text_entries[i].version.name == "firered":
+                    if poke.name in all_pokes.get_names():
+                        continue
+                    all_pokes.add_poke(Pokemon(poke.id))
+            else:
+                continue
+        except: continue
         
-def get_all_items():
+def get_all_items(total=2180):
     #Get all items in the game firered and leafgreen
-    for i in tqdm.tqdm(range(1, 375)):
+    for i in tqdm.tqdm(range(1, total)):#2180
         if all_items.get_by_id(i):
             continue
-        item = pb.item(i)
-        all_items.add_item(Item(item.name))
+        try:
+            item = pb.item(i)
+            for i in range(len(item.flavor_text_entries)):
+                if item.flavor_text_entries[i].version_group.name == "firered-leafgreen":
+                    if item.name in all_items.get_names():
+                        continue
+                    Item(item.name)
+                    break
+        except: continue
         
 def get_all_moves():
     #Get all moves in the game firered and leafgreen
-    for i in tqdm.tqdm(range(1, 355)):
+    for i in tqdm.tqdm(range(1, 937)):#937
         if all_moves.get_by_id(i):
             continue
-        move = pb.move(i)
-        all_moves.add_move(Move(move.name))
+        try:
+            move = pb.move(i)
+            for i in range(len(move.flavor_text_entries)):
+                if move.flavor_text_entries[i].version_group.name == "firered-leafgreen":
+                    if move.name in all_moves.get_names():
+                        continue
+                    Move(move.name)
+                    break
+        except: continue
     
 def get_all_abilities():
     #Get all abilities in the game firered and leafgreen
-    for i in tqdm.tqdm(range(1, 267)):
+    for i in tqdm.tqdm(range(1, 367)):
         if all_abilities.get_by_id(i):
             continue
-        ability = pb.ability(i)
-        for i in range(len(ability.flavor_text_entries)):
-            if ability.flavor_text_entries[i].version_group == "firered-leafgreen":
-                if ability.name in all_abilities.get_names():
-                    continue
-                all_abilities.add_ability(Ability(ability.name))
-                break
+        try:
+            ability = pb.ability(i)
+            for i in range(len(ability.flavor_text_entries)):
+                if ability.flavor_text_entries[i].version_group == "firered-leafgreen":
+                    if ability.name in all_abilities.get_names():
+                        continue
+                    all_abilities.add_ability(Ability(ability.name))
+                    break
+        except: continue
         
 def get_all_types():
     #Get all types in the game firered and leafgreen
-    for i in tqdm.tqdm(range(1, 19)):
+    for i in tqdm.tqdm(range(1, 20)):
         if all_types.get_by_id(i):
             continue
         type_ = pb.type_(i)
-        all_types.add_type(Type(type_.name))
+        Type(type_.name)
         
 def get_all_egg_groups():
     #Get all egg groups in the game firered and leafgreen
@@ -177,67 +221,102 @@ def fill_pokemon_held_items():
             conn.commit()           
 
 def fill_evolutions():
+    saved_pokes = []
     for evol_chain in all_evol.get_all_evolutions():
         for poke in evol_chain.chain.get_pokes():
             
-            chain = evol_chain.get_chain()
-            details = evol_chain.chain.get_evol_details(poke)
+            try:
+                if all_pokes.get_by_name(poke).id in saved_pokes:
+                    continue
+            except: continue
+            
+            chain = evol_chain.get_by_name(poke)
+            details = chain.details
             gender = details['gender']
-            if gender == 1: gender = 'female' 
-            if gender == 2: gender = 'male'
-            else: gender = 'genderless'
+            
+            # if gender == 1: gender = 'female' 
+            # if gender == 2: gender = 'male'
+            # else: gender = 'genderless'
             
             held_item = details['held_item']
-            held_item = all_items.get_by_name(held_item)
+            if held_item == None: held_item = ''
+            else: held_item = all_items.get_by_name(held_item.name).name
+            
             
             item = details['item']
-            item = all_items.get_by_name(item)
+            if item == None: item = ''
+            elif item.name not in all_items.get_names(): item = ''
+            else: item = all_items.get_by_name(item.name).name
             
-            known_move = details['known_move']
-            move = all_moves.get_by_name(known_move)
+            move = details['known_move']
+            if move == None: move = ''
+            else: move = all_moves.get_by_name(move.name).name
+            
             
             known_move_type = details['known_move_type']
-            known_move_type = all_types.get_by_name(known_move_type)
+            if known_move_type == None: known_move_type = ''
+            else:
+                known_move_type = all_types.get_by_name(known_move_type.name).name
             
             location = details['location']
+            if location == None: location = ''
+            else: location = location.name
             min_affection = details['min_affection']
+            if min_affection == None: min_affection = -1
             min_beauty = details['min_beauty']
+            if min_beauty == None: min_beauty = -1
             min_happiness = details['min_happiness']
+            if min_happiness == None: min_happiness = -1
             min_level = details['min_level']
-            needs_overworld_rain = details['needs_overworld_rain']
+            if min_level == None: min_level = -1
+            needs_overworld_rain = str(details['needs_overworld_rain'])
+            if needs_overworld_rain == None: needs_overworld_rain = "False"
             
             party_species = details['party_species']
-            party_species = all_pokes.get_by_name(party_species)
+            if party_species == None: party_species = ''
+            else: party_species = all_pokes.get_by_name(party_species.name).name
             
             party_type = details['party_type']
-            party_type = all_types.get_by_name(party_type)
+            if party_type == None: party_type = ''
+            else: party_type = all_types.get_by_name(party_type.name).name
             
             relative_physical_stats = details['relative_physical_stats']
+            if relative_physical_stats == None: relative_physical_stats = -1
             time_of_day = details['time_of_day']
+            if time_of_day == None: time_of_day = ''
             
             trade_species = details['trade_species']
-            trade_species = all_pokes.get_by_name(trade_species)
+            if trade_species == None: trade_species = ''
+            else: trade_species = all_pokes.get_by_name(trade_species.name).name
             
-            turn_upside_down = details['turn_upside_down']
+            turn_upside_down = str(details['turn_upside_down'])
+            if turn_upside_down == None: turn_upside_down = ''
             trigger = details['trigger']
+            if trigger == None: trigger = ''
+            else: trigger = trigger.name
             
             cursor.execute('''
-            INSERT INTO Evolutions(id, pokemon_id, gender, held_item_id, known_move_id, known_move_type_id, location_id, min_affection, min_beauty, min_happiness, min_level, needs_overworld_rain, party_species_id, party_type_id, relative_physical_stats, time_of_day, trade_species_id, turn_upside_down, trigger)
-            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-            ''', (chain.species.id, chain.species.id, gender, held_item.id, item.id, move.id, known_move_type.id, location, min_affection, min_beauty, min_happiness, min_level, needs_overworld_rain, party_species.id, party_type.id, relative_physical_stats, time_of_day, trade_species.id, turn_upside_down, trigger))
+            INSERT INTO Evolution(id, pokemon_id, gender, held_item, item, known_move, known_move_type, location, min_affection, min_beauty, min_happiness, min_level, needs_overworld_rain, party_species, party_type, relative_physical_stats, time_of_day, trade_species, turn_upside_down, trigger)
+            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ''', (all_pokes.get_by_name(chain.species).id, all_pokes.get_by_name(chain.species).id, gender, held_item, item, move, known_move_type, location, min_affection, min_beauty, min_happiness, min_level, needs_overworld_rain, party_species, party_type, relative_physical_stats, time_of_day, trade_species, turn_upside_down, trigger))
             conn.commit()
+            
+            saved_pokes.append(all_pokes.get_by_name(chain.species).id)
+            
         
 def fill_pokemon_evolutions():
     for poke in all_pokes:
         evol_chain = all_evol.get_by_id(poke.evolution_chain_id)
-        for evol in evol_chain.chain.get_next_evols(poke):
+        if evol_chain.chain.get_next_evols(poke.name) == None:
+            continue
+        for evol in evol_chain.chain.get_next_evols(poke.name):
             if evol == None:
                 continue
             else:
                 cursor.execute('''
-                INSERT INTO Pokemon_Evolutions(pokemon_id, evolution_id)
+                INSERT INTO Pokemon_Evolution(pokemon_id, evolution_id)
                 VALUES(?,?)
-                ''', (poke.id, evol.species.id))
+                ''', (poke.id, all_pokes.get_by_name(evol.species).id))
                 conn.commit()  
 
 def fill_locations():
@@ -252,9 +331,9 @@ def fill_areas():
     for location in all_locations.get_all_locations():
         for area in location.areas:
             cursor.execute('''
-            INSERT INTO Areas(location_id, area_id)
-            VALUES(?,?)
-            ''', (location.id, area.id))
+            INSERT INTO Areas(id, name, location_id)
+            VALUES(?,?,?)
+            ''', (area.id, area.name, location.id))
             conn.commit()
 
 def fill_encounter_methods():
@@ -268,11 +347,15 @@ def fill_encounter_methods():
 def fill_pokemon_encounters():
     for location in all_locations.get_all_locations():
         for area in location.areas:
-            for encounter in area.encounters:
+            for encounter in area.pokemon_encounters:
+                pokemon = all_pokes.get_by_name(encounter.pokemon)
+                if pokemon == None:
+                    all_pokes.add_poke(Pokemon(pb.pokemon(encounter.pokemon).id))
+                    pokemon = all_pokes.get_by_name(encounter.pokemon)
                 cursor.execute('''
-                INSERT INTO Pokemon_Encounters(pokemon_id, area_id, encounter_method_id, min_level, max_level, chance)
+                INSERT INTO Pokemon_Encounter(pokemon_id, area_id, encounter_method_id, min_level, max_level, chance)
                 VALUES(?,?,?,?,?,?)
-            ''', (encounter.pokemon.id, area.id, encounter.method.id, encounter.min_level, encounter.max_level, encounter.chance))
+            ''', (pokemon.id, area.id, encounter.encounter_method, encounter.min_level, encounter.max_level, encounter.rate))
             conn.commit()
 
 def fill_area_x_encounter():
@@ -283,7 +366,7 @@ def fill_area_x_encounter():
                 cursor.execute('''
                 INSERT INTO AreaXEncounter_Method(area_id, encounter_method_id, rate)
                 VALUES(?,?,?)
-                ''', (area.id, encounter.id, area.encounter_methods[method.name]))#ERROR: 'str' object has no attribute 'name'
+                ''', (area.id, encounter.id, area.encounter_methods[encounter.name]))#ERROR: 'str' object has no attribute 'name'
                 conn.commit()
 #endregion
 

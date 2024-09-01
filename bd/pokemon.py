@@ -160,6 +160,9 @@ class Evolution_chain:
     def __str__(self):
         return str(self.chain)
     
+    def get_by_name(self, poke_name):
+        return self.chain.get_by_name(poke_name)
+    
     def get_pokes(self):
         return self.chain.get_pokes()
     
@@ -173,7 +176,8 @@ class Chain:
         self.details = self.set_details(chain)
         self.evolves_to = []
         for i in range(len(chain.evolves_to)):
-            self.evolves_to.append(Chain(chain.evolves_to[i]))
+            if chain.evolves_to[i].species.name in all_pokes.get_names():
+                self.evolves_to.append(Chain(chain.evolves_to[i]))
         
     def set_details(self, chain):
         details = {}
@@ -183,6 +187,9 @@ class Chain:
             for element in names:
                 if element in evol_details.__dict__:
                     details[element] = evol_details.__dict__[element]
+        else:
+            for element in names:
+                details[element] = None
         return details
         
     def get_pokes(self):
@@ -190,6 +197,14 @@ class Chain:
         for i in range(len(self.evolves_to)):
             pokes += self.evolves_to[i].get_pokes()
         return pokes
+    
+    def get_by_name(self, poke_name):
+        if self.species == poke_name:
+            return self
+        for i in range(len(self.evolves_to)):
+            if poke_name in self.evolves_to[i].get_pokes():
+                return self.evolves_to[i].get_by_name(poke_name)
+        return None
     
     def get_next_evols(self, poke_name : str):
         if self.species == poke_name:
@@ -221,13 +236,18 @@ class Location:
     
     def get_areas(self, location):
         areas = []
+        found = False
         for i in range(len(location.areas)):
             encounter_methods = location.areas[i].encounter_method_rates
             for j in range(len(encounter_methods)):
                 for k in range(len(encounter_methods[j].version_details)):
                     if encounter_methods[j].version_details[k].version.name == "firered":
                         areas.append(Area(location.areas[i].name))
+                        found = True
                         break
+                if found:
+                    found = False
+                    break
         return areas
 
 class Area:
@@ -282,7 +302,7 @@ class All_encounter_methods:
         self.all_encounter_methods = []
     
     def add_encounter_method(self, encounter_method : Encounter_method):
-        if encounter_method not in self.all_encounter_methods:
+        if encounter_method.name not in self.get_names():
             self.all_encounter_methods.append(encounter_method)
         
     def get_names(self):

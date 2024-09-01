@@ -1,14 +1,19 @@
+from pokemon import *
 import fill_bd as fill
 
-fill.get_all_pokemons()
+# pokemon = 'pichu'
+# fill.get_all_pokemons()
+# fill.get_evolutions()
+# for evol_chain in all_evol.get_all_evolutions():
+#     if pokemon in evol_chain.get_pokes():
+#         print(evol_chain.get_by_name(pokemon).species)
+#         break
+# all_pokes.get_by_name('pichu').id
+
+fill.get_all_pokemons(151)
 fill.get_evolutions()
-fill.get_locations()
+fill.get_all_items()
 
 fill.fill_pokemons()
-fill.fill_locations()
-fill.fill_areas()
-fill.fill_area_x_encounter()
-fill.fill_encounter_methods()
-fill.fill_pokemon_encounters()
 fill.fill_evolutions()
 fill.fill_pokemon_evolutions()
