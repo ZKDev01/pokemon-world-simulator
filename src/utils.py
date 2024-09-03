@@ -149,8 +149,11 @@ prioridad_de_acciones = {
     'usar objeto':2,
     'huir':2,
     'quick-attack':1,
+    'extreme-speed':1,
     'other':0,
-    'counter':-1
+    'counter':-1,
+    'whirl-pool':-1,
+    'roar':-1,
 }
 
 # estados efímeros: se padecen solo estando en combate
@@ -170,7 +173,7 @@ persistent_states = ['paralizado', 'quemado', 'envenenado', 'gravemente envenena
 
 # 2. Afectan si ejecuta el movimiento o no:
 
-def confuso(pokemon1, pokemon2=None):
+def confuso(activationTurn, turn,pokemon1, pokemon2=None, atMap=False):
     move = Move('movimiento confuso', 40, 100, 100, 18, 'physical', 'none', 'selected-pokemon', 'Inflicts regular damage with no additional effect.')
 
     r = random.randint(1, 3)
@@ -183,7 +186,7 @@ def confuso(pokemon1, pokemon2=None):
     else:
         return False
 
-def enamorado(pokemon1, pokemon2=None):
+def enamorado(activationTurn, turn, pokemon1, pokemon2=None, atMap=False):
     r = random.randint(1, 2)
 
     if r == 1:
@@ -191,7 +194,7 @@ def enamorado(pokemon1, pokemon2=None):
     else:
         return False
     
-def paralizado(pokemon1, pokemon2=None):
+def paralizado(activationTurn, turn, pokemon1, pokemon2=None, atMap=False):
     pokemon1.actualState.speed = pokemon1.speed/2
 
     r = random.randint(1, 4)
@@ -201,26 +204,27 @@ def paralizado(pokemon1, pokemon2=None):
     else:
         return False
 
-def congelado(pokemon1, pokemon2=None):
+
+def congelado(activationTurn, turn, pokemon1, pokemon2=None, atMap=False):
     return True
 
-def dormido(pokemon1, pokemon2=None, numberOfTurn=0):
+def dormido(activationTurn, turn, pokemon1, pokemon2=None, atMap=False):
     r = random.randint(1, 5)
-    if r <= numberOfTurn:
+    if r >= turn - activationTurn:
         return True
     else:
         return False
     
     
-afectan_ejecucion_de_movimiento = [confuso, enamorado, paralizado]
+afectan_ejecucion_de_movimiento = [confuso, enamorado, paralizado, congelado, dormido]
 
 # 4 reducen o aumentan los puntos de vida del pokemon
 
-def maldito(pokemon1, pokemon2):   # pendiente ver si es de su vida maxima o de su vida actual
+def maldito(activationTurn, turn, pokemon1, pokemon2=None, atMap=False):   # pendiente ver si es de su vida maxima o de su vida actual
     state = pokemon1.actualState
     state.hp -= pokemon1.hp/4
 
-def drenado(pokemon1, pokemon2):
+def drenado(activationTurn, turn, pokemon1, pokemon2, atMap=False):
     state1 = pokemon1.actualState
     state2 = pokemon2.actualState
 
@@ -228,10 +232,10 @@ def drenado(pokemon1, pokemon2):
     state1 -= totalLive
     state2 += totalLive
 
-def cantoMortal(pokemon1, pokemon2):  # pendiente
+def cantoMortal(activationTurn, turn, pokemon1, pokemon2=None, atMap=False):  # pendiente
     pass
 
-def envenenado(pokemon1, pokemon2=None, atMap=False):
+def envenenado(activationTurn, turn, pokemon1, pokemon2=None, atMap=False):
     state = pokemon1.actualState
 
     if(atMap):
@@ -239,9 +243,15 @@ def envenenado(pokemon1, pokemon2=None, atMap=False):
     else:
         state.hp -= pokemon1.hp/8
 
-#def gravemente_envenenado(pokemon1, pokemon2, atMap=False):
+def gravemente_envenenado(activationTurn, turn, pokemon1, pokemon2=None, atMap=False):
+    state = pokemon1.actualState
 
-def quemado(pokemon1, pokemon2=None, atMap=False):
+    if(atMap):
+        state.hp -= 1
+    else:
+        state.hp -= pokemon1.hp * (1/16 * (turn - activationTurn + 1)) 
+
+def quemado(activationTurn, turn, pokemon1, pokemon2=None, atMap=False):
     pokemon1.actualState.attack = pokemon1.attack/2
 
     state = pokemon1.actualState
@@ -249,19 +259,48 @@ def quemado(pokemon1, pokemon2=None, atMap=False):
     if not atMap:
         state.hp -= pokemon1.hp/8
 
-afectan_puntos_de_vida = [maldito, drenado, cantoMortal, envenenado]
+afectan_puntos_de_vida = [maldito, drenado, cantoMortal, envenenado, quemado]
+
+# metodos en los que los pokemones puede salir de ciertos estados como congelacion
+
+def congelado_v(activationTurn, turn, pokemon1, pokemon2=None, atMap=False):
+    r = random.randint(1, 5)
+    if r == 1:
+        negEffects = pokemon1.actualState.negEffects
+        for i in range(len(negEffects)):
+            if negEffects[i].name == 'congelado' or negEffects[i].name == 'congelado_v':
+                negEffects.remove(negEffects[i])
+
+def paralisis_v(activationTurn, turn, pokemon1, pokemon2=None, atMap=False):
+    r = random.randint(1, 4)
+    if r == 1:
+        negEffects = pokemon1.actualState.negEffects
+        for i in range(len(negEffects)):
+            if negEffects[i].name == 'paralisis' or negEffects[i].name == 'paralisis_v':
+                negEffects.remove(negEffects[i])
+        
+
+verificar_salida_del_estado = [congelado_v, paralisis_v]
 
 # las condiciones de estado tendrán un tipo, que determinará cual de las funciones va a activar, dependiendo de como se 
 # definan, por ejemplo parálisis determina si el pokemon se va a move cuando le toque atacar, mientras que si tiene algún
 # efecto que le reduzca stats se activa otro efecto y al iniciar el turno
 
 class ConditionState():
-    def __init__(self, name, type, pokemon):
+    def __init__(self, name, pokemon, turn):
         self.name = name
-        self.type = type
+        self.effect = globals().get(name)
+
+        if self.effect in afectan_ejecucion_de_movimiento:
+            self.type = 'afectanEjecucionDeMovimiento'
+        elif self.effect in afectan_puntos_de_vida:
+            self.type = 'afectanPuntosDeVida'
+        else:
+            self.type = 'afectanCambio'
+        
+        self.activationTurn = turn
     
-    def ActivateEffect(self, pokemon):
-        pass
+    def ActivateEffect(self, turn, pokemon1, pokemon2=None, atMap=False):
+        self.effect(self.activationTurn, turn, pokemon1, pokemon2, atMap)
 
 # se revisará a qué grupo pertenece la condición, y dependiendo de ello, se definirá la inicialización de la clase
-# luego, pendiente

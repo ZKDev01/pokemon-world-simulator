@@ -59,6 +59,7 @@ class Couch():
 
     def GetMove_at_Battle(self, myPokemonState:PokemonState, oponentPokemonState:PokemonState):
 
+        #pendiente
         myPokemon = myPokemonState.pokemon  # de tipo Pokemon
         oponentPokemon = oponentPokemonState.pokemon
 
