@@ -8,8 +8,8 @@ class PokemonState():
         self.pokemon = pokemon
         self.type = type
         self.lvl = lvl
-        self.negEffect = []   # serán del tipo ConditionState
-        self.posEffect = []
+        self.negEffects = []   # serán del tipo ConditionState
+        self.posEffects = []
         self.hp = hp
         self.attack = attack
         self.defense = defense
@@ -143,14 +143,17 @@ class Pokemon():   # por ahora clase lista
 
     # Por implemetar
 
-    def UpdatePokemonState(self, pokemon, updateType, pokemonState:PokemonState=None, move=None, potion=None): # pokemon es de Tipo Pokemon
+    def UpdatePokemonState(self, pokemon, updateType, pokemonState:PokemonState=None, hp=0, potion=None, posEffects=None, negEffects=None): # pokemon es de Tipo Pokemon
 
-            updateTypeArr = ['attack', 'home', 'potion', 'effects']
+            updateTypeArr = ['attack', 'home', 'potion', 'positive effects', 'negative effects']
 
-            if (updateType == updateTypeArr[1]):
-                pass           # entonces estamos seguros de que se proporcionó un movimiento y un estado de pokemon, que sería el estado del pokemon contrario
+            if (updateType == updateType[0]):   # si es de tipo ataque entonces hay seguridad de que se proporcionó un estado de pokemon, un hp que sería el daño ocasionado
+                pokemonState.hp -= hp
+                if pokemonState.hp <= 0:
+                    pokemonState.hp = 0
+
             
-            elif (updateType == updateTypeArr[2]):
+            elif (updateType == updateTypeArr[1]):
                 pokemonState.hp = pokemon.hp
                 pokemonState.attack = pokemon.attack
                 pokemonState.defense = pokemon.defense
@@ -159,70 +162,16 @@ class Pokemon():   # por ahora clase lista
                 pokemonState.speed = pokemon.speed
                 pokemonState.negEffect = None    #por ahora, es como si no tuviera efectos negativos, verificar luego en la base de datos
                 pokemonState.posEffect = None    #igual que efectos negativos
-            else:
-                if potion == 'curarParalisis':    #por ahora dejémoslo así, luego seguro se creará una función para por cada pocion de la bd hacer el efecto indicado
-                    pokemonState.negEffect = None
+
+                
+            elif (updateType == updateTypeArr[2]):
+                pass           # entonces estamos seguros de que se proporcionó una potion
+
+            elif (updateType == updateTypeArr[3]):   # entonces estamos seguros de que se proporcionó un conjunto de estados positivos
+                for i in range(len(posEffects)):
+                    pokemon.actualState.posEffects.append(posEffects[i])
+
+            elif (updateType == updateTypeArr[4]):   # entonces estamos seguros de que se proporcionó un conjunto de estados negativos
+                for i in range(len(negEffects)):
+                    pokemon.actualState.negEffects.append(negEffects[i])
             
-def AsignMoves(pokemon):
-    result = [0, 0, 0, 0]
-
-    pokemon_id = pokemon.id
-    pokemon_lvl = pokemon.lvl
-
-    cursor.execute(f'SELECT pokemon_id, move_id, learned_at_level FROM Pokemon_Moves WHERE pokemon_id = {pokemon_id}')
-    pokemon_moves = cursor.fetchall()
-
-    pokemon_moves_at_lvl = []
-
-    for i in range(len(pokemon_moves)):
-        if pokemon_moves[i][2] == 0 or pokemon_moves[i][2] > pokemon_lvl:
-            continue
-        else:
-            pokemon_moves_at_lvl.append(pokemon_moves[i])
-
-    # ordenamos en orden ascendente según el lvl y nos quedamos con los 4 últimos
-    pokemon_moves_at_lvl = OrderByLearnedAtLvl(pokemon_moves_at_lvl)
-
-    for i in range(len(pokemon_moves_at_lvl)):
-        pokemon_move = pokemon_moves_at_lvl[i]
-        pokemon_move_id = pokemon_move[1]
-
-        cursor.execute(f'SELECT * FROM Moves WHERE id = {pokemon_move_id}')
-        m = cursor.fetchall()[0]
-
-        move = Move(m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8]) # move(id, name, power, pp, accuracy, type_id, category, ailment, target, effect)
-        result[i] = move
-    
-    return result
-
-
-
-
-
-
-
-
-
-
-
-class Move():
-    def __init__(self, name:str, power:int, pp:int, accuracy:int, type:str, category:str,
-                 ailment:str, target:str, effect):  # el efect esta en veremos de que tipo va a ser
-        
-        self.name = name
-        self.power = power
-        self.pp = pp
-        self.accuracy = accuracy
-        self.type = type
-        self.category = category
-        self.ailment = ailment
-        self.target = target
-        self.effect = effect
-
-    # Función que dependiendo del estado del pokemon que ataca, el estado del pokemon que recibe el ataque,
-    # el efecto del movimiento, los efectos positivos del atacante, los efectos negativos del que recibe el 
-    # ataque, entre otros, calcula el daño que recibirá el pokemon atacado, asi como los efectos negativos
-    # que podría desarrollar, así como los efectos positivos que podría desarrollar el atacante
-
-    def GetDamage(self, pokemonState1:PokemonState, pokemonState2:PokemonState):
-        pass
