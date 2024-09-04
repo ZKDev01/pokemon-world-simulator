@@ -6,22 +6,26 @@ cursor = conn.cursor()
 
 class Move():
     def __init__(self, name:str, power:int, pp:int, accuracy:int, type:str, category:str,
-                 ailment:str, target:str, effect):  # el efect esta en veremos de que tipo va a ser
+                 ailment:str, target:str, effects):  # el efect esta en veremos de que tipo va a ser
         
         self.name = name
         self.power = power
+        self.critical_prob = 24    # en rojo fuego la probabilidad de critico es de 1 en 24, en el metodo GetDamage() se hacer random.randint(1, critical_prob)
         self.pp = pp
         self.accuracy = accuracy
         self.type = type
         self.category = category
         self.ailment = ailment
         self.target = target
-        self.effect = effect
+        self.effects = effects
 
-    # Función que dependiendo del estado del pokemon que ataca, el estado del pokemon que recibe el ataque,
-    # el efecto del movimiento, los efectos positivos del atacante, los efectos negativos del que recibe el 
-    # ataque, entre otros, calcula el daño que recibirá el pokemon atacado, asi como los efectos negativos
-    # que podría desarrollar, así como los efectos positivos que podría desarrollar el atacante
+    def DoMove(self, pokemon1State, pokemon2State, turn):
+        effects = self.effects
+
+        for i in range(len(effects)):
+            effect = effects[i]
+
+            effect(self, pokemon1State, pokemon2State, turn)
 
 
 def OrderByLearnedAtLvl(pokemon_moves_at_lvl:list):

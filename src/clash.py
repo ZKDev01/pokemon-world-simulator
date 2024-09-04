@@ -34,14 +34,14 @@ class Clash():
 
             for i in range(len(pokemon1_negEffects)):
                 negEffect1:ConditionState = pokemon1_negEffects[i]
-                if negEffect1.name in verificar_salida_del_estado:
+                if globals()[negEffect1.name] in verificar_salida_del_estado:
                     negEffect1.ActivateEffect(turn=turn, pokemon1=self.couch1.pokemonLider)
 
-            pokemon2_negEffects = self.couch2.pokemonLider.actualState.negEffects
+            pokemon2_negEffect = self.couch2.pokemonLider.actualState.negEffects
 
-            for i in range(len(pokemon2_negEffects)):
-                negEffect2:ConditionState = pokemon2_negEffects[i]
-                if negEffect1.name in verificar_salida_del_estado:
+            for i in range(len(pokemon2_negEffect)):
+                negEffect2:ConditionState = pokemon2_negEffect[i]
+                if globals()[negEffect1.name] in verificar_salida_del_estado:
                     negEffect1.ActivateEffect(turn=turn, pokemon1=self.couch2.pokemonLider)
 
             # fin de verificación de liberación de estados negativos #
@@ -66,25 +66,38 @@ class Clash():
             except:
                 couch2_move_speed = 0
 
-            if couch1_move_speed > couch2_move_speed:     # guardamos la info de la manera (couch, pokemon_couch_state, other_pokemon_state)
-                turn1 = turn, couch1_move
-                turn2 = turn, couch2_move
+            if couch1_move_speed > couch2_move_speed:     # guardamos la info de la manera turn_(turn, couch, pokemonLider_couch_actualState)
+                turn1 = turn, couch1_move, self.couch1.pokemonLider.actualState
+                turn2 = turn, couch2_move, self.couch2.pokemonLider.actualState
             elif couch1_move_speed < couch2_move_speed:
-                turn1 = turn, couch2_move
-                turn2 = turn, couch1_move
+                turn1 = turn, couch2_move, self.couch2.pokemonLider.actualState
+                turn2 = turn, couch1_move, self.couch1.pokemonLider.actualState
             elif self.couch1.pokemonLider.actualState.speed >= self.couch2.pokemonLider.actualState.speed:  # si tienen la misma prioridad entonces se comparan las velocidades de cada pokemon
-                turn1 = turn, couch1_move
-                turn2 = turn, couch2_move
+                turn1 = turn, couch1_move, self.couch1.pokemonLider.actualState
+                turn2 = turn, couch2_move, self.couch2.pokemonLider.actualState
             else:
-                turn1 = turn, couch2_move
-                turn2 = turn, couch1_move    # se tienen los movimientos almacenados en turn1 y turn2 respectivamente
+                turn1 = turn, couch2_move, self.couch2.pokemonLider.actualState
+                turn2 = turn, couch1_move, self.couch1.pokemonLider.actualState
+                # se tienen los movimientos almacenados en turn1 y turn2 respectivamente
 
-            # fin de la selección de cual movimiento se ejecuta primero y ejecución de dicho movimiento #
+            # fin de la selección de cuál movimiento se ejecuta primero y ejecución de dicho movimiento #
 
 
             # ejecución de los movimientos basándose en si tienen efectos negativos que afecten en la determinación del movimiento o no
 
+            negEffect1:ConditionState = pokemon1_negEffects
+            if globals()[negEffect1.name] in afectan_ejecucion_de_movimiento:  
+                if not negEffect1.ActivateEffect(turn=turn, pokemon1=turn1[2]):
+
+                    pass  # pendiente de ejecutar el movimiento con su respectivo efecto 
             
+            negEffect2:ConditionState = pokemon2_negEffect
+            if globals()[negEffect2.name] in afectan_ejecucion_de_movimiento:
+                if not negEffect2.ActivateEffect(turn=turn, pokemon1=turn2[2]):
+
+                    pass  # al igual que el de arriba pendiente
+
+            # fin de la ejecución de movimientos #
                        
 
 

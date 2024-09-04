@@ -1,8 +1,6 @@
 from utils import *
 
 
-        
-
 class PokemonState():
     def __init__(self, pokemon, type, lvl, hp, attack, defense, specialAttack, specialDefense, speed):    #aqui negEffect(Paralisis, etc) posEffect(Pociones, etc)
         self.pokemon = pokemon
