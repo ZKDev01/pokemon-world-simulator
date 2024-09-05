@@ -271,7 +271,7 @@ def congelado_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atM
             if negEffects[i].name == 'congelado' or negEffects[i].name == 'congelado_v':
                 negEffects.remove(negEffects[i])
 
-def paralisis_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+def paralizado_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
     r = random.randint(1, 4)
     if r == 1:
         negEffects = pokemon1.actualState.negEffects
@@ -280,7 +280,7 @@ def paralisis_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atM
                 negEffects.remove(negEffects[i])
         
 
-verificar_salida_del_estado = [congelado_v, paralisis_v]
+verificar_salida_del_estado = [congelado_v, paralizado_v]
 
 
 
