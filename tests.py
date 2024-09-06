@@ -12,14 +12,20 @@ from bd import fill_bd as fill
 #         break
 # all_pokes.get_by_name('pichu').id
 
-fill.get_all_pokemons(151)
-fill.get_evolutions()
-fill.get_all_items()
+# fill.get_all_pokemons(151)
+# fill.get_evolutions()
+# fill.get_all_items()
 
-fill.fill_pokemons()
-fill.fill_evolutions()
-fill.fill_pokemon_evolutions()
+# fill.fill_pokemons()
+# fill.fill_evolutions()
+# fill.fill_pokemon_evolutions()
 
 #----------------------------------------MAPA TESTS----------------------------------------
 
 from mapa.create_map import *
+
+# build_random_map()
+
+map = build_kanto_map()
+print(map)
+print(map.get_next_locations('lavender-town'))
