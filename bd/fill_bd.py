@@ -1,7 +1,7 @@
 import pokebase as pb
 import sqlite3
 import tqdm
-from pokemon import *
+from bd.pokemon import *
 
 REGIONS = [1]
 GENERATIONS = [1] 
