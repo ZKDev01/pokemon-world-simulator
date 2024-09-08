@@ -186,9 +186,9 @@ def fill_pokemon_egg_groups():
 def fill_moves():
     for move in all_moves.get_all_moves():
         cursor.execute('''
-        INSERT INTO Moves(id, name, power, pp, accuracy, type_id, category, ailment, target, effect)
+        INSERT INTO Moves(id, name, power, pp, accuracy, type_id, category, ailment, target, effect_id)
         VALUES(?,?,?,?,?,?,?,?,?,?)
-        ''', (move.id, move.name, move.power, move.pp, move.accuracy, pb.type_(move.type).id, move.category, move.ailment, move.target, move.effects))
+        ''', (move.id, move.name, move.power, move.pp, move.accuracy, pb.type_(move.type).id, move.category, move.ailment, move.target, move.effect_id))
         conn.commit()
         
 def fill_pokemon_moves():
@@ -201,6 +201,14 @@ def fill_pokemon_moves():
                 VALUES(?,?,?,?)
                 ''', (pokemon.id, move.id, type, level))
                 conn.commit()
+                
+def fill_effects():
+    for effect in all_effects.get_all_effects():
+        cursor.execute('''
+        INSERT INTO Effects(id, effect)
+        VALUES(?,?)
+        ''', (effect[0], effect[1]))
+        conn.commit()
             
 def fill_items():
     for item in all_items.get_all_items():
@@ -402,6 +410,7 @@ def get_all():
     get_locations()
           
 def fill_all():
+    fill_effects()
     fill_habitats()
     fill_pokemons()
     fill_types()
