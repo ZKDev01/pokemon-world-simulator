@@ -1,7 +1,7 @@
 import pokebase as pb
 import sqlite3
 import tqdm
-from bd.pokemon import *
+from pokemon import *
 
 REGIONS = [1]
 GENERATIONS = [1] 
@@ -123,9 +123,9 @@ def get_locations():
 def fill_pokemons():
     for poke in all_pokes.get_all_pokes():
         cursor.execute('''
-        INSERT INTO Pokemons(id, name, height, weight, base_experience, growth_rate, generation, hp, attack, defense, special_attack, special_defense, speed)
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)
-        ''', (poke.id, poke.name, poke.height, poke.weight, poke.base_exp, poke.growth_rate, poke.generation, poke.stats["hp"], poke.stats["attack"], poke.stats["defense"], poke.stats["special-attack"], poke.stats["special-defense"], poke.stats["speed"]))
+        INSERT INTO Pokemons(id, name, height, weight, base_experience, growth_rate, generation, hp, attack, defense, special_attack, special_defense, speed, habitat_id)
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ''', (poke.id, poke.name, poke.height, poke.weight, poke.base_exp, poke.growth_rate, poke.generation, poke.stats["hp"], poke.stats["attack"], poke.stats["defense"], poke.stats["special-attack"], poke.stats["special-defense"], poke.stats["speed"], poke.habitat[0]))
         conn.commit()
 
 def fill_types():
@@ -368,6 +368,27 @@ def fill_area_x_encounter():
                 VALUES(?,?,?)
                 ''', (area.id, encounter.id, area.encounter_methods[encounter.name]))#ERROR: 'str' object has no attribute 'name'
                 conn.commit()
+
+def fill_habitats():
+    for i in range(1,10):
+        try:
+            habitat = pb.pokemon_habitat(i)
+            cursor.execute('''
+            INSERT INTO Habitats(id, name)
+            VALUES(?,?)
+            ''', (habitat.id, habitat.name))
+            conn.commit()
+        except: continue
+        
+# def fill_pokemon_habitats():
+#     for pokemon in all_pokes:
+#         habitat = pokemon.habitat
+#         cursor.execute('''
+#         INSERT INTO Pokemon_Habitat(pokemon_id, habitat_id)
+#         VALUES(?,?)
+#         ''', (pokemon.id, habitat[0]))
+#         conn.commit()
+    
 #endregion
 
 def get_all():
@@ -381,6 +402,7 @@ def get_all():
     get_locations()
           
 def fill_all():
+    fill_habitats()
     fill_pokemons()
     fill_types()
     fill_pokemon_types()
@@ -399,3 +421,4 @@ def fill_all():
     fill_encounter_methods()
     fill_pokemon_encounters()
     fill_area_x_encounter()
+    # fill_pokemon_habitats()
