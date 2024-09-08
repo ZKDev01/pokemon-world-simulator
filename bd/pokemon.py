@@ -51,6 +51,7 @@ class Pokemon:
         self.held_items = self.get_poke_items(pokemon)
         self.abilities = self.get_poke_abilities(pokemon)
         self.moves = self.get_poke_moves(pokemon)
+        self.habitat = (pokemon.species.habitat.id, pokemon.species.habitat.name)
         self.egg_groups = []
         for i in range(len(pokemon.species.egg_groups)):
             self.egg_groups.append(Egg_group(pokemon.species.egg_groups[i].name))
