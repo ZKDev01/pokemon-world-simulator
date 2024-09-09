@@ -97,6 +97,16 @@ CREATE TABLE IF NOT EXISTS Moves(
     category TEXT,
     ailment TEXT,
     target TEXT,
+    effect_id INTEGER,
+    
+    FOREIGN KEY(type_id) REFERENCES Types(id)
+)
+''')
+
+#Create table Effects
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS Effects(
+    id INTEGER PRIMARY KEY,
     effect TEXT
 )
 ''')
