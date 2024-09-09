@@ -23,7 +23,10 @@ CREATE TABLE IF NOT EXISTS Pokemons(
     defense INTEGER,
     special_attack INTEGER,
     special_defense INTEGER,
-    speed INTEGER
+    speed INTEGER,
+    habitat_id INTEGER,
+    
+    FOREIGN KEY(habitat_id) REFERENCES Habitats(id)
 )
 ''')
 
@@ -240,6 +243,25 @@ CREATE TABLE IF NOT EXISTS AreaXEncounter_Method(
     FOREIGN KEY(encounter_method_id) REFERENCES Encounter_Methods(id)
 )
 ''')
+
+#Create table Habitats
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS Habitats(
+    id INTEGER PRIMARY KEY,
+    name TEXT
+)
+''')
+
+# #Create table Pokemon_Habitat
+# cursor.execute('''
+# CREATE TABLE IF NOT EXISTS Pokemon_Habitat(
+#     pokemon_id INTEGER,
+#     habitat_id INTEGER,
+#     FOREIGN KEY(pokemon_id) REFERENCES Pokemons(id),
+#     FOREIGN KEY(habitat_id) REFERENCES Habitats(id)
+# )
+# ''')
+
                
 conn.close()
 
