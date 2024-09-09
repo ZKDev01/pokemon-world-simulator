@@ -209,28 +209,30 @@ def congelado(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap
     return True
 
 def dormido(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
-    r = random.randint(1, 5)
-    if r >= turn - activationTurn:
-        return True
-    else:
-        return False
+    return True 
+   
+def flaqueado(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    return True
     
-    
-afectan_ejecucion_de_movimiento = [confuso, enamorado, paralizado, congelado, dormido]
+afectan_ejecucion_de_movimiento = [confuso, enamorado, paralizado, congelado, dormido, flaqueado]
 
 # 4 reducen o aumentan los puntos de vida del pokemon
 
 def maldito(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):   # pendiente ver si es de su vida maxima o de su vida actual
     state = pokemon1.actualState
     state.hp -= pokemon1.hp/4
+    return False
 
 def drenado(activationTurn, turn, turnDuration, pokemon1, pokemon2, atMap=False):
     state1 = pokemon1.actualState
     state2 = pokemon2.actualState
 
     totalLive = pokemon1.hp/8
-    state1 -= totalLive
-    state2 += totalLive
+    state1.hp -= totalLive
+    state1.hp = 0 if state1.hp <= 0 else state1.hp
+    state2.hp += totalLive
+    state2.hp = state2.pokemon.hp if state2.hp >= state2.pokemon.hp else state2.hp  
+    return False
 
 def cantoMortal(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):  # pendiente
     pass
@@ -242,6 +244,7 @@ def envenenado(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMa
         state.hp -= 1
     else:
         state.hp -= pokemon1.hp/8
+    return False
 
 def gravemente_envenenado(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
     state = pokemon1.actualState
@@ -250,6 +253,7 @@ def gravemente_envenenado(activationTurn, turn, turnDuration, pokemon1, pokemon2
         state.hp -= 1
     else:
         state.hp -= pokemon1.hp * (1/16 * (turn - activationTurn + 1)) 
+    return False
 
 def quemado(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
     pokemon1.actualState.attack = pokemon1.attack/2
@@ -258,6 +262,8 @@ def quemado(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=F
 
     if not atMap:
         state.hp -= pokemon1.hp/8
+    return False
+
 
 afectan_puntos_de_vida = [maldito, drenado, cantoMortal, envenenado, quemado]
 
@@ -270,6 +276,7 @@ def congelado_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atM
         for i in range(len(negEffects)):
             if negEffects[i].name == 'congelado' or negEffects[i].name == 'congelado_v':
                 negEffects.remove(negEffects[i])
+    return False
 
 def paralizado_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
     r = random.randint(1, 4)
@@ -278,9 +285,28 @@ def paralizado_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, at
         for i in range(len(negEffects)):
             if negEffects[i].name == 'paralisis' or negEffects[i].name == 'paralisis_v':
                 negEffects.remove(negEffects[i])
-        
 
-verificar_salida_del_estado = [congelado_v, paralizado_v]
+    return False
+        
+def dormido_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    if turn - activationTurn == turnDuration:
+        negEffects = pokemon1.actualState.negEffects
+        for i in range(len(negEffects)):
+            if negEffects[i].name == 'dormido' or negEffects[i].name == 'dormido_v':
+                negEffects.remove(negEffects[i])
+    return False
+
+def flaqueado_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    if turn - activationTurn != 0:
+        negEffects = pokemon1.actualState.negEffects
+        for i in range(len(negEffects)):
+            if negEffects[i].name == 'flaqueado' or negEffects[i].name == 'flaqueado_v':
+                negEffects.remove(negEffects[i])
+    return False
+
+    
+
+verificar_salida_del_estado = [congelado_v, paralizado_v, dormido_v]
 
 
 
