@@ -264,8 +264,36 @@ def quemado(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=F
         state.hp -= pokemon1.hp/8
     return False
 
+def pesadilla(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    pokemon1.actualState.hp -= pokemon1.hp / 4
+    pokemon1.actualState.hp = 0 if pokemon1.actualState.gp <= 0 else pokemon1.actualState.hp
+    return False
 
-afectan_puntos_de_vida = [maldito, drenado, cantoMortal, envenenado, quemado]
+def pesadilla_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    negEffects = pokemon1.actualState.negEffects
+    effects_to_remove = []
+
+    for i in range(len(negEffects)):
+        if negEffects[i].name == 'dormido' or negEffects[i].name == 'dormido_v':
+            effects_to_remove.append(negEffects[i])
+    for i in range(len(effects_to_remove)):
+        negEffects.remove(effects_to_remove[i])
+    
+    return False
+
+def dead_to_dead(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    if pokemon1.actualState <= 0:
+        pokemon2.actualState = 0
+    return False
+
+def dead_at_3_turns(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    if turn - activationTurn == 3:
+        pokemon1.actualState.hp = 0
+        pokemon2.actualState.hp = 0
+    return False    
+
+
+afectan_puntos_de_vida = [maldito, drenado, cantoMortal, envenenado, quemado, pesadilla]
 
 # métodos en los que los pokemones puede salir de ciertos estados como congelación
 
@@ -304,9 +332,12 @@ def flaqueado_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atM
                 negEffects.remove(negEffects[i])
     return False
 
-    
-
 verificar_salida_del_estado = [congelado_v, paralizado_v, dormido_v]
+
+def dont_leave_battle(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    return True
+
+verificar_salida_de_combate = [dont_leave_battle]
 
 
 

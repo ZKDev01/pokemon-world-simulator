@@ -766,6 +766,204 @@ def inflicts_half_hp(move, pokemon1State, pokemon2State, turn):
         return False
     return True
 
+def triple_kick(move, pokemon1State, pokemon2State, turn):
+    initial_power = move.power
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+
+        move.power = move.power + initial_power
+    
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+
+        move.power = move.power + initial_power
+
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+
+        move.power = move.power + initial_power
+
+    move.power = initial_power
+
+    return False
+
+def prevents_leave_to_battle(move, pokemon1State, pokemon2State, turn):
+    condition = ConditionState(name='dont_leave_battle')
+    pokemon2State.negEffects.append(condition)
+    return False
+
+def nightmare(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        condition = ConditionState(name='pesadilla_v', pokemon=pokemon2State.pokemon, turn=turn)
+        condition1 = ConditionState(name='pesadilla', pokemon=pokemon2State.pokmeon, turn=turn)
+
+        pokemon2State.negEffects.append(condition)
+        pokemon2State.negEffects.append(condition1)
+        
+        return False
+    return True
+
+def perc_to_flinch_30_if_is_sleeped(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+
+        do_effect = False
+        negEffects = pokemon2State.negEffects
+        for i in range(len(negEffects)):
+            if negEffects[i].name == 'dormido':
+                do_effect = True
+        if do_effect:
+            r = random.randint(1, 10)
+            if r <= 3:
+                pokemon2State.hp = 0
+        
+        return False
+    return True
+
+def curse(move, pokemon1State, pokemon2State, turn):
+    if pokemon1State.type == 'ghost':
+        condition = ConditionState(name='maldicion', pokemon=pokemon2State.pokemon, turn=turn)
+        pokemon2State.negEffects.append(condition)
+    else:
+        pokemon1State.speed = pokemon1State.speed *0.67
+        pokemon1State.attack = pokemon1State.attack * 1.5
+        pokemon1State.defense = pokemon1State.defense * 1.5
+        return False
+
+def reversal(move, pokemon1State, pokemon2State, turn):
+    initial_power = move.power
+    perc = pokemon1State.hp / pokemon1State.pokemon.hp
+
+    if perc >= 0.68:
+        move.power = 20
+    elif perc < 0.68 and perc >= 0.35:
+        move.power = 40
+    elif perc < 0.35 and perc >= 0.20:
+        move.power = 80
+    elif perc < 0.20 and perc >= 0.10:
+        move.power = 100
+    elif perc < 0.10 and perc >= 0.04:
+        move.power = 150
+    else:
+        move.power = 200
+
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+        move.power = initial_power
+        return False
+    move.power = initial_power
+    return True
+
+def conversion_2(move, pokemon1State, pokemon2State, turn):
+    pass
+
+def lowers_pp_target_by_4(move, pokemon1State, pokemon2State, turn):
+    pass
+
+def maximiza_atk_paying_half_live(move, pokemon1State, pokemon2State, turn):
+    pass
+
+def perc_to_paralyze_100(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+
+        condition = ConditionState(name='paralizado_v', pokemon=pokemon2State.pokemon, turn=turn)
+        condition1 = ConditionState(name='paralizado', pokemon=pokemon2State.name, turn=turn)
+
+        pokemon2State.negEffects.append(condition)
+        pokemon2State.negEffects.append(condition1)
+
+        return False
+    return True
+
+def dead_then_target_dead(move, pokemon1State, pokemon2State, turn):
+    condition = ConditionState(name='dead_to_dead', pokemon=pokemon1State.pokemon, turn=turn)
+    pokemon1State.negEffects.append(condition)
+    return False
+
+def user_and_target_dead_in_3turns(move, pokemon1State, pokemon2State, turn):
+    condition_pokemon1 = ConditionState(name='dead_at_3_turns', pokemon=pokemon1State.pokemon)
+    condition_pokemon2 = ConditionState(name='dead_at_3_turns', pokemon=pokemon2State.pokemon, turn=turn)
+
+    pokemon1State.negEffects.append(condition_pokemon1)
+    pokemon2State.negEffects.append(condition_pokemon2)
+
+    return False
+
+def perc_to_lowers_speed_onestage_100(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+
+        pokemon2State.speed = pokemon2State.speed * 0.5
+        return False
+    return True
+
+def lowers_target_attack_by_two_stages(move, pokemon1State, pokemon2State, turn):
+    pokemon2State.attack = pokemon2State.attack * 0.5
+    return False
+
+def can_not_lower_hp_below_1(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 1 if pokemon2State.hp <= 0 else pokemon2State.hp
+        return False
+    return True
+
+def swagger(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        pokemon2State.attack = pokemon2State.attack * 2
+        condition = ConditionState(name='confundido', pokemon=pokemon2State.pokemon, turn=turn)
+        pokemon2State.negEffects.append(condition)
+    return True
+
+def perc_to_raises_user_defense_10(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State
+
+        r = random.randint(1, 10)
+        if r <= 1:
+            pokemon1State.defense = pokemon1State.defense * 1.5
+        return False
+    return True
+
+
 
 
 
@@ -860,6 +1058,35 @@ move_effects = {
     "Transfers 1/4 of the user's max HP into a doll, protecting the user from further damage or status changes until it breaks.":[],  # pendiente substitute, muito complejo
     "User takes 1/4 its max HP in recoil.":[recoil_un_cuarto],
     "Permanently becomes the target's last used move.":[],   # pendiente registro de movimientos de los entrenadores
+    "Hits three times, increasing power by 100_ with each successful hit.":[triple_kick],
+    "Takes the target's item.":[normal_attack], # pendiente lo de robar el objeto del pokemon contrario
+    "Prevents the target from leaving battle.":[prevents_leave_to_battle],
+    "Ensures that the user's next move will hit the target.":[],   # pendiente efecto positivo
+    "Target loses 1/4 its max HP every turn as long as it's asleep.":[nightmare],
+    "Has a 10_ chance to burn the target.  Lets frozen Pokémon thaw themselves.":[perc_to_burn_10],  # pendiente lo de descongelarse
+    "Has a 30_ chance to make the target flinch.  Only works if the user is sleeping.":[perc_to_flinch_30_if_is_sleeped],
+    "Ghosts pay half their max HP to hurt the target every turn.  Others decrease Speed but raise Attack and Defense.":[curse],
+    "Inflicts more damage when the user has less HP remaining, with a maximum of 200 power.":[reversal],
+    "Changes the user's type to a random type either resistant or immune to the last move used against it.":[],  # pendiente registro de movimientos
+    "Lowers the PP of the target's last used move by 4.":[],   # pendiente registro de movimientos
+    "Prevents any moves from hitting the user this turn.":[],  # pendiente efectos positivos
+    "User pays half its max HP to max out its Attack.":[],   # pendiente efectos positivos
+    "Has a 100_ chance to lower the target's accuracy by one stage.":[], # pendiente bajar punteria de los pokemones
+    "Has a 50_ chance to lower the target's accuracy by one stage.":[], # pendiente bajar punteria de los pokemones
+    "Scatters Spikes, hurting opposing Pokémon that switch in.":[],   # pendiente
+    "Has a 100_ chance to paralyze the target.":[perc_to_paralyze_100], 
+    "Forces the target to have no Evade, and allows it to be hit by Normal and Fighting moves even if it's a Ghost.":[],   # mucho texto
+    "If the user faints this turn, the target automatically will, too.":[dead_then_target_dead],
+    "User and target both faint after three turns.":[user_and_target_dead_in_3turns],
+    "Has a 100_ chance to lower the target's Speed by one stage.":[perc_to_lowers_speed_onestage_100],
+    "Changes the weather to a sandstorm for five turns.":[],  # mucho texto
+    "Prevents the user's HP from lowering below 1 this turn.":[], # pendiente efectos positivos
+    "Lowers the target's Attack by two stages.":[lowers_target_attack_by_two_stages],
+    "Power doubles every turn this move is used in succession after the first, resetting after five turns.":[],  # pendiente  registro de movimientos
+    "Cannot lower the target's HP below 1.":[can_not_lower_hp_below_1],
+    "Raises the target's Attack by two stages and confuses the target.":[swagger],
+    "Power doubles every turn this move is used in succession after the first, maxing out after five turns.":[], # pendiente registro de movimientos
+    "Has a 10_ chance to raise the user's Defense by one stage.":[],
 }
 
 
