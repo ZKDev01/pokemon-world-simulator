@@ -132,7 +132,12 @@ class Move:
         self.accuracy = move.accuracy if move.accuracy else 0
         self.pp = move.pp
         self.target = move.target.name
-        self.effects = [effect.short_effect for effect in move.effect_entries][0]
+        
+        effect = [effect.short_effect for effect in move.effect_entries][0]
+        all_effects.add_effect(effect)
+        self.effect_id = all_effects.get_id(effect)
+        
+        # [effect.short_effect for effect in move.effect_entries][0]
         # self.learned_by = self.get_learned_by(move)
         self.ailment = move.meta.ailment.name
         #How this move is learned by a pokemon
@@ -147,6 +152,38 @@ class Move:
     #     for i in range(len(move.learned_by_pokemon)):
     #         learned_by.append(move.learned_by_pokemon[i].pokemon.name)
     #     return learned_by
+class All_effects:
+    def __init__(self):
+        self.all_effects : list[tuple[int, str]] = []
+        
+    def add_effect(self, effect : str):
+        #Cambiar todos los '%' por '_'
+        effect = effect.replace("%", "_")
+        if self.get_id(effect) == None:
+            #Get the bigger id and add 1
+            id = 0
+            for i in range(len(self.all_effects)):
+                if self.all_effects[i][0] > id:
+                    id = self.all_effects[i][0]
+            self.all_effects.append((id + 1, effect))
+        
+    
+    def get_id(self, effect):
+        for i in range(len(self.all_effects)):
+            if self.all_effects[i][1] == effect:
+                return i
+        return None
+    
+    def get_effect(self, id):
+        for i in range(len(self.all_effects)):
+            if self.all_effects[i][0] == id:
+                return self.all_effects[i][1]
+        return None
+    
+    def get_all_effects(self):
+        return self.all_effects
+        
+        
     
 class Evolution_chain:
     def __init__(self, id):
@@ -709,3 +746,4 @@ all_egg_groups = All_egg_groups()
 all_evol = All_evolutions()
 all_locations = All_locations()
 all_enc_methods = All_encounter_methods()
+all_effects = All_effects()

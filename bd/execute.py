@@ -3,6 +3,9 @@ import fill_bd as fill
 fill.get_all()
 fill.fill_all()
 
+# fill.get_all_moves()
+# fill.fill_effects()
+
 # fill.fill_habitats()
 
 # fill.get_all_pokemons()
