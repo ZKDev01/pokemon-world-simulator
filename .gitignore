@@ -1,3 +1,5 @@
 assets/*
 .venv/
 pokedex.db
+mapa/__pycache__/
+bd/__pycache__/
