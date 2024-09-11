@@ -1,6 +1,169 @@
 import mapa.read_bd as read_bd
 import random
 from collections import deque
+import random
+
+LOCATIONS = read_bd.get_locations()
+AREAS = read_bd.get_areas()  
+POKEMON_ENCOUNTERS = read_bd.get_pokemon_encounters()
+ENCOUNTER_METHODS = read_bd.get_encounter_methods()
+AREA_ENCOUNTER_METHODS = read_bd.get_area_encounter_methods()
+POKEMONES = read_bd.get_pokemons()
+HABITATS = read_bd.get_habitats()
+
+class Pokemon_encounter:
+    def __init__(self, pokemon_name, area_name, encounter_method_rate, encounter_method_name, min_level, max_level, chance):
+        self.pokemon_name = pokemon_name
+        self.area_name = area_name
+        self.encounter_method_rate = encounter_method_rate
+        self.encounter_method_name = encounter_method_name
+        self.min_level = min_level
+        self.max_level = max_level
+        self.chance = chance     
+
+class Area:
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+        self.pokemon_encounters = self._set_pokemon_encounters()
+        self.encounter_methods_rate = self._set_encounter_methods_rate()
+        self.ecosystems = self._set_ecosystems()
+        
+    def _set_ecosystems(self):
+        ecosystems = {}
+        pokemon_list = self.get_pokemons()
+        for pokemon in POKEMONES:
+            if pokemon[1] in pokemon_list:
+                ecosystem = None
+                for habitat in HABITATS:
+                    if habitat[0] == pokemon[13]:
+                        ecosystem = habitat[1]
+                        break
+                if ecosystem not in ecosystems:
+                    ecosystems[ecosystem] = []
+                ecosystems[ecosystem].append(pokemon[1])
+        return ecosystems
+    
+    def get_ecosystems(self):   
+        return self.ecosystems
+    
+    def get_pokemons_by_ecosystem(self, ecosystem):
+        return self.ecosystems[ecosystem]
+        
+    def _set_encounter_methods_rate(self):
+        encounter_methods_rate = {}
+        for element in AREA_ENCOUNTER_METHODS:
+            if element[0] == self.id:
+                encounter_method = None
+                for method in ENCOUNTER_METHODS:
+                    if method[0] == element[1]:
+                        encounter_method = method[1]
+                        break
+                rate = element[2]
+                encounter_methods_rate[encounter_method] = rate
+        return encounter_methods_rate
+    
+    def _set_pokemon_encounters(self):
+        pokemon_encounters = []
+        for encounter in POKEMON_ENCOUNTERS:
+            if encounter[1] == self.id:
+                pokemon = None
+                for p in POKEMONES:
+                    if p[0] == encounter[0]:
+                        pokemon = p[1]
+                        break
+                method_name = None
+                for method in ENCOUNTER_METHODS:
+                    if method[0] == encounter[2]:
+                        method_name = method[1]
+                        break
+                method_rate = None
+                for method in AREA_ENCOUNTER_METHODS:
+                    if method[0] == self.id and method[1] == encounter[2]:
+                        method_rate = method[2]
+                        break
+                pokemon_encounters.append(Pokemon_encounter(pokemon, self.name, method_rate, method_name, encounter[3], encounter[4], encounter[5]))      
+        return pokemon_encounters
+        
+        
+    def add_pokemon_encounter(self, encounter : Pokemon_encounter):
+        self.pokemon_encounters.append(encounter)
+        
+    def get_pokemons(self):
+        return [encounter.pokemon_name for encounter in self.pokemon_encounters]
+
+    def use_encounter_method(self, encounter_method_name):
+        '''
+        Metodo que simula el uso de un metodo de encuentro en un area. Primero se determina si se encuentra un pokemon con el metodo proporcionado. Luego,
+        si el encuentro es exitoso, se elige un pokemon de la lista de pokemons que se pueden encontrar en el area con el metodo de encuentro pasado como parametro.
+        
+        Parameters:
+        encounter_method_name : str
+            Nombre del metodo de encuentro a utilizar.
+            
+        Returns:
+        tuple
+            Tupla con el nombre del pokemon encontrado y el nivel del mismo.
+        '''
+        if encounter_method_name in self.encounter_methods_rate:
+            rate = self.encounter_methods_rate[encounter_method_name]
+            #rate: probabilidad de encontrar un pokemon con el metodo de encuentro encounter_method_name
+            random_number = random.randint(0, 100)
+            if random_number <= rate:
+                rates = []
+                pokemons = []
+                level = 0
+                for encounter in self.pokemon_encounters:
+                    if encounter.encounter_method_name == encounter_method_name:
+                        pokemons.append(encounter.pokemon_name)
+                        rates.append(encounter.chance)
+                        level = random.randint(encounter.min_level, encounter.max_level)
+                        #El pokemon en el lugar i de la lista pokemons tiene la probabilidad en el lugar i de la lista rates
+                return (random.choices(pokemons, rates), level)
+            else:
+                return None
+        
+    def __str__(self):
+        return self.name
+    
+    def __repr__(self):
+        return self.name
+
+class Location:
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+        self.areas = []
+        
+    def get_ecosystems(self):
+        '''
+        Metodo que retorna un diccionario con los ecosistemas presentes en la ubicacion y los pokemons que se pueden encontrar en cada uno.
+        
+        Returns:
+        dict
+            Diccionario con los ecosistemas presentes en la ubicacion y los pokemons que se pueden encontrar en cada uno.
+        '''
+        ecosystems = {}
+        for area in self.areas:
+            for ecosystem in area.ecosystems:
+                if ecosystem not in ecosystems:
+                    ecosystems[ecosystem] = []
+                for pokemon in area.get_pokemons_by_ecosystem(ecosystem):
+                    ecosystems[ecosystem].append(pokemon)
+        return ecosystems
+    
+    def get_areas(self):
+        return self.areas
+        
+    def add_area(self, area : Area):
+        self.areas.append(area)
+        
+    def __str__(self):
+        return self.name
+    
+    def __repr__(self):
+        return self.name
+    
 
 class Map:
     nodes = []#locations
@@ -24,6 +187,12 @@ class Map:
             elif conn[1].name == location:
                 next_locations.append(conn[0].name)
         return next_locations
+    
+    def get_areas(self, location):
+        for node in self.nodes:
+            if node.name == location:
+                return node.areas
+        return None
         
     def add_node(self, location):
         self.nodes.append(location)
@@ -54,11 +223,11 @@ class Map:
                 i -= 1
             # Check if the graph is connected
             if i == total_conns-1:
-                if not self.bfs_check_connected():
+                if not self._check_graph_connectivity():
                     self.connections = []
                     i = -1
                 
-    def bfs_check_connected(self):
+    def _check_graph_connectivity(self):
         if not self.nodes:
             return False
         
@@ -84,17 +253,31 @@ class Map:
     
     def __str__(self):
         return "Nodes: " + str([node.name for node in self.nodes]) + "\nConnections: " + str([(conn[0].name, conn[1].name) for conn in self.connections])
-            
+    
+    def get_location(self, name):
+        for node in self.nodes:
+            if node.name == name:
+                return node
+        return None
+    
+    def get_area(self, name):
+        for node in self.nodes:
+            for area in node.areas:
+                if area.name == name:
+                    return area
+        return None
+    
+    def get_all_locations(self):
+        return [node.name for node in self.nodes]
           
 
-locations = read_bd.get_locations()
-areas = read_bd.get_areas()  
+
 
 def build_random_map():
     map = Map()
-    for location in locations:#location = (id, name, region_id) --> no se usa region_id
+    for location in LOCATIONS:#location = (id, name, region_id) --> no se usa region_id
         map.add_node(Location(location[0], location[1]))
-    for area in areas:#area = (id, name, location_id)
+    for area in AREAS:#area = (id, name, location_id)
         for location in map.nodes:
             if location.id == area[2]:
                 location.add_area(Area(area[0], area[1], location))
@@ -104,14 +287,36 @@ def build_random_map():
 
 def build_kanto_map():
     map = Map()
-    for location in locations:#location = (id, name, region_id) --> no se usa region_id
+    for location in LOCATIONS:#location = (id, name, region_id) --> no se usa region_id
         map.add_node(Location(location[0], location[1]))
-    for area in areas:#area = (id, name, location_id)
+    for area in AREAS:#area = (id, name, location_id)
         for location in map.nodes:
-            if location.id == area[2]:
-                location.add_area(Area(area[0], area[1], location))
+            if location.id == area[2]:#area[2] = location_id
+                area_ = Area(area[0], area[1]) 
+                location.add_area(area_)
                 break #Se asume que cada area pertenece a un solo 'location'
     kanto_map(map)
+    
+    # for location in map.nodes:
+    #     for area in location.areas:
+    #         for encounter in POKEMON_ENCOUNTERS:
+    #             if encounter[1] == area.id:
+    #                 pokemon = None
+    #                 for p in POKEMONES:
+    #                     if p[0] == encounter[0]:
+    #                         pokemon = p[1]
+    #                         break
+    #                 method_name = None
+    #                 for method in ENCOUNTER_METHODS:
+    #                     if method[0] == encounter[2]:
+    #                         method_name = method[1]
+    #                         break
+    #                 method_rate = None
+    #                 for method in AREA_ENCOUNTER_METHODS:
+    #                     if method[0] == area.id and method[1] == encounter[2]:
+    #                         method_rate = method[2]
+    #                         break
+    #                 area.add_pokemon_encounter(Pokemon_encounter(pokemon, area.name, method_rate, method_name, encounter[3], encounter[4], encounter[5]))
     return map
 
 def kanto_map(map):
@@ -162,51 +367,4 @@ def kanto_map(map):
     map.add_connection("lavender-town", "pokemon-tower")
     map.add_connection("cerulean-cave", "kanto-route-4")
     map.add_connection("cinnabar-island", "pokemon-mansion")
-    
-    # Nodos
-# locations = [
-#     "Pallet Town", "Viridian City", "Pewter City", "Cerulean City",
-#     "Vermilion City", "Lavender Town", "Celadon City", "Fuchsia City",
-#     "Cinnabar Island", "Indigo Plateau",
-#     "Route 1", "Route 2", "Route 3", "Route 4", "Route 5",
-#     "Route 6", "Route 7", "Route 8", "Route 9", "Route 10",
-#     "Route 11", "Route 12", "Route 13", "Route 14", "Route 15",
-#     "Route 16", "Route 17", "Route 18"
-# ]
-
-# # Conexiones
-# connections = [
-#     ("Pallet Town", "Route 1"),
-#     ("Route 1", "Viridian City"),
-#     ("Viridian City", "Route 2"),
-#     ("Route 2", "Pewter City"),
-#     ("Pewter City", "Route 3"),
-#     ("Route 3", "Cerulean City"),
-#     ("Cerulean City", "Route 4"),
-#     ("Route 4", "Vermilion City"),
-#     ("Vermilion City", "Route 11"),
-#     ("Route 11", "Lavender Town"),
-#     ("Lavender Town", "Route 12"),
-#     ("Route 12", "Celadon City"),
-#     ("Celadon City", "Route 16"),
-#     ("Route 16", "Fuchsia City"),
-#     ("Fuchsia City", "Route 18"),
-#     ("Cinnabar Island", "Route 21"),
-#     ("Indigo Plateau", "Route 22")
-# ]
-    
-class Area: 
-    def __init__(self, id, name, location):
-        self.id = id
-        self.name = name
-        self.location = location
-    
-class Location:
-    def __init__(self, id, name):
-        self.id = id
-        self.name = name
-        self.areas = []
-        
-    def add_area(self, area : Area):
-        self.areas.append(area)
         
