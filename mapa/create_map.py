@@ -1,12 +1,83 @@
 import mapa.read_bd as read_bd
 import random
 from collections import deque
+import random
+
+locations = read_bd.get_locations()
+areas = read_bd.get_areas()  
+pokemon_encounters = read_bd.get_pokemon_encounters()
+encounter_methods = read_bd.get_encounter_methods()
+area_x_encounter_methods = read_bd.get_area_encounter_methods()
+pokemons = read_bd.get_pokemons()
+
+class Pokemon_encounter:
+    def __init__(self, pokemon_name, area_name, encounter_method_rate, encounter_method_name, min_level, max_level, chance):
+        self.pokemon_name = pokemon_name
+        self.area_name = area_name
+        self.encounter_method_rate = encounter_method_rate
+        self.encounter_method_name = encounter_method_name
+        self.min_level = min_level
+        self.max_level = max_level
+        self.chance = chance
+        
+
+        
+
+class Area:
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name      #dict(encounter_method name, list[pokemon name])
+        self.pokemon_encounters : list[Pokemon_encounter] = []
+        self.encounter_methods_rate = {}
+        
+    def set_encounter_methods_rate(self, encounter_method, rate):
+        self.encounter_methods_rate[encounter_method] = rate
+        
+        
+    def add_pokemon_encounter(self, encounter : Pokemon_encounter):
+        self.pokemon_encounters.append(encounter)
+        
+    def get_pokemons(self):
+        return [encounter.pokemon_name for encounter in self.pokemon_encounters]
+
+    def use_encounter_method(self, encounter_method_name):
+        rates = []
+        pokemons = []
+        for encounter in self.pokemon_encounters:
+            if encounter.encounter_method_name == encounter_method_name:
+                pokemons.append(encounter.pokemon_name)
+                rates.append(encounter.chance)
+                #El pokemon en el lugar i de la lista pokemons tiene la probabilidad en el lugar i de la lista rates
+        return random.choices(pokemons, rates)
+        
+        
+    def __str__(self):
+        return self.name
+    
+    def __repr__(self):
+        return self.name
+
+class Location:
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+        self.areas = []
+        
+    def add_area(self, area : Area):
+        self.areas.append(area)
+        
+    def __str__(self):
+        return self.name
+    
+    def __repr__(self):
+        return self.name
+    
 
 class Map:
     nodes = []#locations
     connections = []
     
-    def __init__(self, locations=None, connections=None):
+    def __init__(self, locations, connections=None):
         self.nodes = []
         self.connections = []
         if locations:
@@ -84,11 +155,25 @@ class Map:
     
     def __str__(self):
         return "Nodes: " + str([node.name for node in self.nodes]) + "\nConnections: " + str([(conn[0].name, conn[1].name) for conn in self.connections])
-            
+    
+    def get_location(self, name):
+        for node in self.nodes:
+            if node.name == name:
+                return node
+        return None
+    
+    def get_area(self, name):
+        for node in self.nodes:
+            for area in node.areas:
+                if area.name == name:
+                    return area
+        return None
+    
+    def get_all_locations(self):
+        return [node.name for node in self.nodes]
           
 
-locations = read_bd.get_locations()
-areas = read_bd.get_areas()  
+
 
 def build_random_map():
     map = Map()
@@ -108,10 +193,44 @@ def build_kanto_map():
         map.add_node(Location(location[0], location[1]))
     for area in areas:#area = (id, name, location_id)
         for location in map.nodes:
-            if location.id == area[2]:
-                location.add_area(Area(area[0], area[1], location))
+            if location.id == area[2]:#area[2] = location_id
+                #A partir de aqui se agregan los metodos de encuentro a cada area y sus tasas.
+                area_ = Area(area[0], area[1], location)
+                for element in area_x_encounter_methods:
+                    if element[0] == area[0]:
+                        encounter_method = None
+                        for method in encounter_methods:
+                            if method[0] == element[1]:
+                                encounter_method = method[1]
+                                break
+                        rate = element[2]
+                area_.set_encounter_methods_rate(encounter_method, rate)
+                #Hasta aqui
+                
+                location.add_area(area_)
                 break #Se asume que cada area pertenece a un solo 'location'
     kanto_map(map)
+    
+    for location in map.nodes:
+        for area in location.areas:
+            for encounter in pokemon_encounters:
+                if encounter[1] == area.id:
+                    pokemon = None
+                    for p in pokemons:
+                        if p[0] == encounter[0]:
+                            pokemon = p[1]
+                            break
+                    method_name = None
+                    for method in encounter_methods:
+                        if method[0] == encounter[2]:
+                            method_name = method[1]
+                            break
+                    method_rate = None
+                    for method in area_x_encounter_methods:
+                        if method[0] == area.id and method[1] == encounter[2]:
+                            method_rate = method[2]
+                            break
+                    area.add_pokemon_encounter(Pokemon_encounter(pokemon, area.name, method_rate, method_name, encounter[3], encounter[4], encounter[5]))
     return map
 
 def kanto_map(map):
