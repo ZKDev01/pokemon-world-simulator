@@ -27,5 +27,9 @@ from mapa.create_map import *
 # build_random_map()
 
 map = build_kanto_map()
-print(map)
-print(map.get_next_locations('lavender-town'))
+# print(map)
+# print(map.get_next_locations('mt-moon'))
+areas = map.get_areas('mt-moon')
+print(areas)
+print(areas[0].get_pokemons())
+print(areas[0].get_ecosystems())
