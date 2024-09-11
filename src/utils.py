@@ -269,6 +269,10 @@ def pesadilla(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap
     pokemon1.actualState.hp = 0 if pokemon1.actualState.gp <= 0 else pokemon1.actualState.hp
     return False
 
+def trap(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    pokemon1.actualState.hp -= pokemon1.hp /16
+    return False
+
 def pesadilla_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
     negEffects = pokemon1.actualState.negEffects
     effects_to_remove = []
@@ -337,7 +341,18 @@ verificar_salida_del_estado = [congelado_v, paralizado_v, dormido_v]
 def dont_leave_battle(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
     return True
 
-verificar_salida_de_combate = [dont_leave_battle]
+def trap_t(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    if turn - activationTurn == turnDuration:
+        effectsToRemove = []
+        negEffects = pokemon1.actualState.negEffects
+        for i in range(len(negEffects)):
+            if negEffects[i].name == 'trap' or negEffects[i].name == 'trap_t':
+                effectsToRemove.append(negEffects[i])
+        for i in range(len(effectsToRemove)):
+            negEffects.remove(effectsToRemove[i])
+    return True
+
+verificar_salida_de_combate = [dont_leave_battle, trap_t]
 
 
 
