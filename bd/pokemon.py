@@ -48,6 +48,7 @@ class Pokemon:
         self.generation = pokemon.species.generation.name.split("-")[1]
         self.growth_rate = pokemon.species.growth_rate.name
         self.stats = self.get_poke_stats(pokemon)
+        self.ev = self.get_evs(pokemon)
         self.held_items = self.get_poke_items(pokemon)
         self.abilities = self.get_poke_abilities(pokemon)
         self.moves = self.get_poke_moves(pokemon)
@@ -68,6 +69,12 @@ class Pokemon:
         for i in range(len(pokemon.stats)):
             poke_stats[pokemon.stats[i].stat.name] = pokemon.stats[i].base_stat
         return poke_stats
+    
+    def get_evs(self, pokemon):
+        evs = {}
+        for i in range(len(pokemon.stats)):
+            evs[pokemon.stats[i].stat.name] = pokemon.stats[i].effort
+        return evs
 
     def get_poke_abilities(self, pokemon):
         poke_abilities = []
