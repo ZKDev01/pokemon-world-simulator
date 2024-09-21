@@ -244,6 +244,7 @@ def get_growth_rate_data():
     with open('growth_rate_data.json', 'r') as file:
         growth_rate_data = json.load(file)   
     return growth_rate_data
+
 # areas = read_areas()
 # locations = read_locations()
 # pokemon_encounters = read_pokemon_encounters()

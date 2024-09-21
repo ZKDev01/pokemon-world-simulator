@@ -1,6 +1,7 @@
 from pokemon import *
 import fill_bd as fill
 import read_bd as read
+# import src.pokedex as pokedex
 
 # pokemon = 'pichu'
 # fill.get_all_pokemons()
@@ -19,8 +20,11 @@ import read_bd as read
 # fill.fill_evolutions()
 # fill.fill_pokemon_evolutions()
 
-lista = read.get_all()
-if len(lista) == 20:
-    print('OK')
-print(lista[1])
+# lista = read.get_all()
+# if len(lista) == 20:
+#     print('OK')
+# print(lista[1])
 
+# pokedex_user = pokedex.Pokedex()
+# pichu = pokedex_user.get_pokemon('pichu')
+# print(pichu.evolves_to)
