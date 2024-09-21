@@ -1,5 +1,6 @@
 from pokemon import *
 import fill_bd as fill
+import read_bd as read
 
 # pokemon = 'pichu'
 # fill.get_all_pokemons()
@@ -10,11 +11,16 @@ import fill_bd as fill
 #         break
 # all_pokes.get_by_name('pichu').id
 
-fill.get_all_pokemons(151)
-fill.get_evolutions()
-fill.get_all_items()
+# fill.get_all_pokemons(151)
+# fill.get_evolutions()
+# fill.get_all_items()
 
-fill.fill_pokemons()
-fill.fill_evolutions()
-fill.fill_pokemon_evolutions()
+# fill.fill_pokemons()
+# fill.fill_evolutions()
+# fill.fill_pokemon_evolutions()
+
+lista = read.get_all()
+if len(lista) == 20:
+    print('OK')
+print(lista[1])
 

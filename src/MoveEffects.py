@@ -1,4 +1,5 @@
 from utils import *
+import bd.read_bd as read_bd
 
 # como vimos los efectos de los movimientos pueden clasificarse principalmente como: 
 # 1. causan daño directamente en los hp del pokemon contrario con un número de n hits
@@ -535,9 +536,8 @@ def resets_stats(move, pokemon1State, pokemon2State, turn):
     pokemon1State.speed = pokemon.speed
 
 def random_move(move, pokemon1State, pokemon2State, turn):
-    cursor.execute("SELECT * FROM Moves")
-
-    moves = cursor.fetchall()
+    moves = read_bd.get_moves()
+    
     r = random.randint(0, len(moves))
     move = moves[r]
     move = Move(name=move[0], power=move[1], pp=move[2], accuracy=move[3], type=move[4], category=move[5], ailment=move[6], target=move[7], effects=move_effects[move[8]])

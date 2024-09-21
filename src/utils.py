@@ -1,14 +1,17 @@
 import random
-import sqlite3
-import json
+# import sqlite3
+# import json
+import bd.read_bd as read_bd
 
 from Move import *
 
-conn = sqlite3.connect('pokedex.db')
-cursor = conn.cursor()
+# conn = sqlite3.connect('pokedex.db')
+# cursor = conn.cursor()
 
-with open('growth_rate_data.json', 'r') as file:
-    growth_rate_data = json.load(file)
+# with open('growth_rate_data.json', 'r') as file:
+#     growth_rate_data = json.load(file)
+
+growth_rate_data = read_bd.get_growth_rate_data()
 
 types_arr = ['normal','fighting','flying','poison','ground','rock','bug','ghost','steel','fire','water','grass','electric','psychic','ice','dragon','dark','fairy', 'confuso']
                                                                                                                                         # aquí agregamos en ultimo lugar confuso para evitar errores, como se afecta a si mismo no importa de que tipo sea
@@ -157,7 +160,7 @@ prioridad_de_acciones = {
 }
 
 # estados efímeros: se padecen solo estando en combate
-ephemeral_states = ['confuso', 'enamorado', 'drenado', 'maldito', 'canto maldito', 'atrapado, dormido']
+ephemeral_states = ['confuso', 'enamorado', 'drenado', 'maldito', 'canto maldito', 'atrapado', 'dormido']
 
 # estados persistentes: se padecen incluso fuera de combate
 persistent_states = ['paralizado', 'quemado', 'envenenado', 'gravemente envenenado', 'congelado']
