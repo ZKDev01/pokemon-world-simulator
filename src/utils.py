@@ -148,12 +148,15 @@ prioridad_de_acciones = {
     'cambiar pokemon':2,
     'usar objeto':2,
     'huir':2,
+    'snatch':1,
     'quick-attack':1,
     'extreme-speed':1,
     'other':0,
     'counter':-1,
     'whirl-pool':-1,
     'roar':-1,
+    'focus-punch':-2,
+    'revenge':-3,
 }
 
 # estados efímeros: se padecen solo estando en combate
@@ -296,8 +299,23 @@ def dead_at_3_turns(activationTurn, turn, turnDuration, pokemon1, pokemon2=None,
         pokemon2.actualState.hp = 0
     return False    
 
+def sleep_end_off_nextTurn(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    if turn - activationTurn == 1:
+        negEffects = pokemon1.actualState.negEffects
+        for i in range(len(negEffects)):
+            if negEffects[i].name == 'yawn':
+                negEffects.remove(negEffects[i])   # eliminamos el efecto ya que activamos su efecto a continuacion
+        
+        condition1 = ConditionState(name='dormido', pokemon=pokemon1, turn=turn)
+        condition2 = ConditionState(name='dormido_v', pokemon=pokemon1, turn=turn, turnsDuration=random.randint(2,5))
 
-afectan_puntos_de_vida = [maldito, drenado, cantoMortal, envenenado, quemado, pesadilla]
+        pokemon1.actualState.negEffects.append(condition1)
+        pokemon1.actualState.negEffects.append(condition2)
+
+        return False
+
+
+afectan_puntos_de_vida = [maldito, drenado, cantoMortal, envenenado, quemado, pesadilla, sleep_end_off_nextTurn]    # se verifican al final
 
 # métodos en los que los pokemones puede salir de ciertos estados como congelación
 
@@ -324,7 +342,7 @@ def dormido_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap
     if turn - activationTurn == turnDuration:
         negEffects = pokemon1.actualState.negEffects
         for i in range(len(negEffects)):
-            if negEffects[i].name == 'dormido' or negEffects[i].name == 'dormido_v':
+            if negEffects[i].name == 'dormido' or negEffects[i].name == 'dormido_v':  # pendiente a arreglar
                 negEffects.remove(negEffects[i])
     return False
 
@@ -336,7 +354,6 @@ def flaqueado_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atM
                 negEffects.remove(negEffects[i])
     return False
 
-verificar_salida_del_estado = [congelado_v, paralizado_v, dormido_v]
 
 def dont_leave_battle(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
     return True
@@ -353,6 +370,28 @@ def trap_t(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=Fa
     return True
 
 verificar_salida_de_combate = [dont_leave_battle, trap_t]
+
+def taunt(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    moves = pokemon1.learnedMoves
+    new_moves = []
+
+    for i in range(len(moves)):
+        if moves[i].category != 'status':
+            new_moves.append(moves[i])
+    
+    return new_moves   # pendiente
+
+def taunt_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    if turn - activationTurn == turnDuration:
+        negEffects = pokemon1.actualState.negEffects
+        for i in range(len(negEffects) -1, -1, -1):
+            if negEffects[i].name == 'taunt' or negEffects[i].name == 'taunt_v':
+                negEffects.remove(negEffects[i])
+
+
+
+
+verificar_salida_del_estado = [congelado_v, paralizado_v, dormido_v, taunt_v]
 
 
 

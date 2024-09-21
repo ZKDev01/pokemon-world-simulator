@@ -21,11 +21,13 @@ class Move():
 
     def DoMove(self, pokemon1State, pokemon2State, turn):
         effects = self.effects
-
+        miss = False
         for i in range(len(effects)):
             effect = effects[i]
 
-            effect(self, pokemon1State, pokemon2State, turn)
+            if(effect(self, pokemon1State, pokemon2State, turn)):
+                miss = True
+        return miss
 
 
 def OrderByLearnedAtLvl(pokemon_moves_at_lvl:list):

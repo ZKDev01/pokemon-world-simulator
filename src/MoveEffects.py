@@ -1251,6 +1251,332 @@ def beat_up(move, pokemon1State, pokemon2State, turn):
 
     return False  # por revisar
 
+def fake_out(move, pokemon1State, pokemon2State, turn):
+    if True:
+        return normal_attack(move, pokemon1State, pokemon2State, turn)
+    else:
+        return True
+    
+def raises_specialAtck_confuses_target(move, pokemon1State, pokemon2State, turn):
+    pokemon2State.specialAttack = pokemon2State.specialAttack * 1.5
+    condition = ConditionState(name='confundido', pokemon=pokemon2State.pokemon, turn=turn)
+    pokemon2State.negEffects.append(condition)
+
+    return False
+
+def burn_target(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        condition = ConditionState(name='quemado', pokemon=pokemon2State.pokemon, turn=turn)
+        pokemon2State.negEffects.append(condition)
+        return False
+    return True
+
+def lowers_specialAttack_twostages(move, pokemon1State, pokemon2State, turn):
+    pokemon2State.specialAttack = pokemon2State.specialAttack * 0.5
+    return False
+
+def memento(move, pokemon1State, pokemon2State, turn):
+    lowers_specialAttack_twostages(move, pokemon1State, pokemon2State, turn)
+    lowers_target_attack_by_two_stages(move, pokemon1State, pokemon2State, turn)
+    pokemon1State.hp = 0
+
+    return False
+
+def facade(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        negEffects = pokemon2State.negEffects
+        for i in range(len(negEffects)):
+            if negEffects[i].name == 'paralizado' or negEffects[i].name == 'quemado' or negEffects[i].name == 'envenenado':
+                damage = 2 * damage
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+
+        return False
+
+    return True
+
+def smellings_salts(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage_increment = False
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        negEffects = pokemon2State.negEffects
+        for i in range(len(negEffects) -1, -1, -1):
+            if negEffects[i].name == 'paralizado' or negEffects[i].name == 'paralizado_v':
+                damage_increment = True
+                negEffects.remove(negEffects[i])
+        if damage_increment:
+            damage = 2 * damage                
+
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+        
+        return False
+    return True
+
+def taunt_(move, pokemon1State, pokemon2State, turn):
+    condition1 = ConditionState(name='taunt', pokemon=pokemon2State.pokemon, turn=turn)
+    condition2 = ConditionState(name='taunt_v', pokemon=pokemon2State.pokemon, turn=turn, turnsDuration=3)
+
+    pokemon2State.negEffects.append(condition1)
+    pokemon2State.negEffects.append(condition2)
+
+    return False
+
+def swap_items(move, pokemon1State, pokemon2State, turn):
+    pokemon1_items = pokemon1State.pokemon.inventory   # suponiendo que solo se puede tener un objeto en el inventario
+    pokemon2_items = pokemon2State.pokemon.inventory
+
+    if len(pokemon1_items) == 0 and len(pokemon2_items) == 0:
+        return 
+    
+    elif len(pokemon1_items) != 0 and len(pokemon2_items) == 0:
+        pokemon2_items.append(pokemon1_items[0])
+        pokemon1_items.remove(pokemon1_items[0])
+
+        return
+    elif len(pokemon1_items) == 0 and len(pokemon2_items) != 0:
+        pokemon1_items.append(pokemon2_items[0])
+        pokemon2_items.remove(pokemon2_items[0])
+    else:
+        item1 = pokemon1_items[0]
+        pokemon1_items.remove(pokemon1_items[0])
+        pokemon1_items.append(pokemon2_items[0])
+
+        pokemon2_items.remove(pokemon2_items[0])
+        pokemon2_items.append(item1)
+
+        return
+    
+def random_trained_pok_moves(move, pokemon1State, pokemon2State, turn):
+    pokemons = pokemon1State.pokemon.couch.pokemons
+
+    moves = []
+
+    for i in range(len(pokemons)):
+        if pokemons[i].name == pokemon1State.pokemon.name:
+            continue
+        else:
+            learned_moves = pokemons[i].learnedMoves
+            for j in range(len(learned_moves)):
+                moves.append(learned_moves[j])
+    
+    r = random.randint(0, len(moves))
+    move_ = moves[r]
+
+    return move_.DoMove(pokemon1State, pokemon2State, turn)
+        
+def ingrain(move, pokemon1State, pokemon2State, turn):
+    condition1 = ConditionState(name='dont_leave_battle', pokemon=pokemon2State.pokemon, turn=turn)
+    condition2 = ConditionState(name='trap', pokemon=pokemon2State.pokemon, turn=turn)
+
+    pokemon2State.negEffects.append(condition1)
+    pokemon2State.negEffects.append(condition2)
+
+    return False
+
+def superpower(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(0, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+
+        pokemon1State.attack = pokemon1State.attack * 0.67
+        pokemon1State.defense = pokemon1State.defense * 0.67
+
+        return False
+    return True
+
+def yawn(move, pokemon1State, pokemon2State, turn):
+    condition = ConditionState(name='sleep_end_off_nextTurn', pokemon=pokemon2State.pokemon, turn=turn, turnsDuration=1)
+    pokemon2State.negEffects.append(condition)
+    return False
+
+def lowers_hp_equal_user_is(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(0, 100)
+    if r <= accuracy:
+        pokemon2State.hp = pokemon1State.hp if pokemon2State.hp >= pokemon1State.hp else pokemon2State.hp
+
+        return False
+    return True
+
+def eruption(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        actual_hp = pokemon2State.hp
+        total_hp = pokemon2State.pokemon.hp
+        
+        initial_power = move.power
+        move.power = 150 * (actual_hp/total_hp)
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+
+        move.power = initial_power
+
+        return False
+    return True
+
+def clear_user_burn_paralysis_poison(move, pokemon1State, pokemon2State, turn):
+    negEffects = pokemon1State.negEffects
+
+    for i in range(len(negEffects)-1, -1, -1):
+        if negEffects[i].name == 'quemado' or negEffects[i].name == 'paralizado' or negEffects[i].name == 'paralizado_v' or negEffects[i].name == 'envenenado':
+            negEffects.remove(negEffects[i])
+
+    return False
+
+def raises_user_specialAttack_threestages(move, pokemon1State, pokemon2State, turn):
+    pokemon1State.specialAttack = pokemon1State.specialAttack * 2.5
+    return False
+
+def luster_purge(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+
+        r = random.randint(1, 2)
+        if r <= 1:
+            pokemon2State.specialDefense = pokemon2State.specialDefense * 0.67
+
+        return False
+    return True
+
+def mist_ball(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+
+        r = random.randint(1, 2)
+        if r <= 1:
+            pokemon2State.specialAttack = pokemon2State.specialAttack * 0.67
+
+        return False
+    return True
+
+def blaze_kick(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        critical_prob = 8
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State, critical_prob=critical_prob)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State <= 0 else pokemon2State.hp
+
+        r = random.randint(1, 10)
+        if r <= 1:
+            condition = ConditionState(name='quemado', pokemon=pokemon2State.pokemon, turn=turn)
+            pokemon2State.negEffects.append(condition)
+        
+        return False
+    return True
+
+def perc_badly_poison_50(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State <= 0 else pokemon2State.hp
+
+        r = random.randint(1, 2)
+        if r <= 1:
+            condition = ConditionState(name='gravemente_envenenado', pokemon=pokemon2State.pokemon, turn=turn)
+            pokemon2State.negEffects.append(condition)
+        return False
+    return True
+
+def perc_raise_user_attack_onestage_20(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State <= 0 else pokemon2State.hp
+
+        r = random.randint(1, 10)
+        if r <= 2:
+            pokemon1State.attack = pokemon1State.attack * 1.5
+        return False
+    return True
+
+def lower_target_specialDefense_twostages(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        pokemon2State.specialDefense = pokemon2State.specialDefense * 0.5
+        return False
+    return True
+
+def lower_user_specialAttack_twostages_after_damage(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State <= 0 else pokemon2State.hp
+
+        pokemon1State.specialAttack = pokemon1State.specialAttack * 0.5
+
+        return False
+    return True
+
+def poison_tail(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        critical_prob = 8
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State, critical_prob=critical_prob)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+
+        r = random.randint(1, 10)
+        if r <= 1:
+            condition = ConditionState(name='envenenado', pokemon=pokemon2State.pokemon, turn=turn)
+
+def volt_tackle(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State <= 0 else pokemon2State.hp
+
+        pokemon1State.hp -= damage/3
+        pokemon1State.hp = 0 if pokemon1State.hp <= 0 else pokemon1State.hp
+
+        r = random.randint(1, 10)
+        if r <= 1:
+            condition1 = ConditionState(name='paralizado_v', pokemon=pokemon2State.pokemon, turn=turn)
+            condition2 = ConditionState(name='paralizado', pokemon=pokemon2State.pokemon, turn=turn)
+            pokemon2State.negEffects.append(condition1)
+            pokemon2State.negEffects.append(condition2)
+        
+        return False
+    return True
+
+def raise_speed_onestage(move, pokemon1State, pokemon2State, turn):
+    pokemon1State.speed = pokemon1State.speed * 1.5
+    return False
+
+
 
 
 
@@ -1404,7 +1730,68 @@ move_effects = {
     "Hits the target two turns later.":[], # pendiente efectos positivos
     "Has a 50_ chance to lower the target's Defense by one stage.":[perc_to_lowers_target_defense_onestage_50],
     "Prevents the target from leaving battle and inflicts 1/16 its max HP in damage for 2-5 turns.":[],
-    "Hits once for every conscious Pokémon the trainer has.":[],
+    "Hits once for every conscious Pokémon the trainer has.":[beat_up],
+    "Can only be used as the first move after the user enters battle.  Causes the target to flinch.":[fake_out],
+    "Forced to use this move for several turns.  Pokémon cannot fall asleep in that time.":[],   # pediente efectos positivos
+    "Stores energy up to three times for use with Spit Up and Swallow.":[],   # pendiente estados positivos(colocar cargas)
+    "Power is 100 times the amount of energy Stockpiled.":[],  # pendiente efectos positivos(depende de las cargas de arriba)
+    "Recovers 1/4 HP after one Stockpile, 1/2 HP after two Stockpiles, or full HP after three Stockpiles.":[],  # al igual que el de arriba depende del efecto positivo
+    "Changes the weather to a hailstorm for five turns.":[],   # clima
+    "Prevents the target from using the same move twice in a row.":[],  # pendiente registro de movimientos
+    "Raises the target's Special Attack by one stage and confuses the target.":[raises_specialAtck_confuses_target],
+    "Burns the target.":[burn_target],
+    "Lowers the target's Attack and Special Attack by two stages.  User faints.":[lowers_target_attack_by_two_stages, lowers_specialAttack_twostages],
+    "Power doubles if user is burned, paralyzed, or poisoned.":[facade],
+    "If the user takes damage before attacking, the attack is canceled.":[], # pendiente registro de movimientos
+    "If the target is paralyzed, inflicts double damage and cures the paralysis.":[smellings_salts],
+    "Redirects the target's single-target effects to the user for this turn.":[], # pendiente batalla en equipo
+    "Uses a move which depends upon the terrain.":[], # terrenos pendiente
+    "Raises the user's Special Defense by one stage.  User's Electric moves have doubled power next turn.":[raise_specialDfs_onestage, ],  # pendiente efecto positivo
+    "For the next few turns, the target can only use damaging moves.":[taunt_], 
+    "Ally's next move inflicts half more damage.":[], # combates en equipo, por ahora no
+    "User and target swap items.":[swap_items],
+    "Copies the target's ability.":[],  # no hay habilidades
+    "User will recover half its max HP at the end of the next turn.":[], # pendiente efectos positivos
+    "Randomly selects and uses one of the trainer's other Pokémon's moves.":[random_trained_pok_moves],
+    "Prevents the user from leaving battle.  User regains 1/16 of its max HP every turn.":[ingrain],
+    "Lowers the user's Attack and Defense by one stage after inflicting damage.":[superpower],
+    "Reflects back the first effect move used on the user this turn.":[], # pendiente
+    "User recovers the item it last used up.":[], # pendiente registro de moviminetos
+    "Inflicts double damage if the user takes damage before attacking this turn.":[], # pendiente registro de movimientos 
+    "Destroys Reflect and Light Screen.":[], # pendiente efectos positivos
+    "Target sleeps at the end of the next turn.":[yawn], 
+    "Target drops its held item.":[],  # en la primera generación los pokemones no sostienen items
+    "Lowers the target's HP to equal the user's.":[lowers_hp_equal_user_is],
+    "Inflicts more damage when the user has more HP remaining, with a maximum of 150 power.":[eruption],
+    "User and target swap abilities.":[], # no hay habilidades en primera generacion
+    "Prevents the target from using any moves that the user also knows.":[], # pendiente despues
+    "Cleanses the user of a burn, paralysis, or poison.":[clear_user_burn_paralysis_poison],
+    "If the user faints this turn, the PP of the move that fainted it drops to 0.":[], # pendiente registro de movimientos
+    "Steals the target's move, if it's self-targeted.":[],  # pendiente estados positivos
+    "Has a 30_ chance to inflict a status effect which depends upon the terrain.":[], # terreno
+    "User dives underwater, dodging all attacks, and hits next turn.":[],  # pendiente estados positivos
+    "User's type changes to match the terrain.":[], # terreno 
+    "Raises the user's Special Attack by three stages.":[raises_user_specialAttack_threestages],
+    "Has a 50_ chance to lower the target's Special Defense by one stage.":[luster_purge],
+    "Has a 50_ chance to lower the target's Special Attack by one stage.":[],
+    "Has an increased chance for a critical hit and a 10_ chance to burn the target.":[blaze_kick],
+    "Halves all Electric-type damage.":[], # pendiente estados positivos
+    "Has a 50_ chance to badly poison the target.":[perc_badly_poison_50],
+    "Has a 20_ chance to raise the user's Attack by one stage.":[perc_raise_user_attack_onestage_20],
+    "If there be weather, this move has doubled power and the weather's type.":[], # clima no
+    "Lowers the target's Special Defense by two stages.":[lower_target_specialDefense_twostages],
+    "Lowers the user's Special Attack by two stages after inflicting damage.":[lower_user_specialAttack_twostages_after_damage],
+    "Lowers the target's Attack and Defense by one stage.":[lowers_target_defense_onestage, lowers_atk_onestage],
+    "Raises the user's Defense and Special Defense by one stage.":[raise_dfs_onestage, raise_specialDfs_onestage],
+    "Inflicts regular damage and can hit Bounce and Fly users.":[normal_attack],
+    "Has a 30_ chance to lower the target's accuracy by one stage.":[], # accuracy de pokemon pendiente
+    "Raises the user's Attack and Defense by one stage.":[raise_atk_onestage, raises_defense_onestage],
+    "User bounces high into the air, dodging all attacks, and hits next turn.":[],  # efectos positivos pendiente
+    "Has an increased chance for a critical hit and a 10_ chance to poison the target.":[poison_tail],
+    "User takes 1/3 the damage inflicted in recoil.  Has a 10_ chance to paralyze the target.":[volt_tackle],
+    "Halves all Fire-type damage.":[], # efectos positivos pendiente
+    "Raises the user's Special Attack and Special Defense by one stage.":[raise_specialAtk_onestage, raise_specialDfs_onestage],
+    "Raises the user's Attack and Speed by one stage.":[raise_atk_onestage, raise_speed_onestage],
 }
 
 
