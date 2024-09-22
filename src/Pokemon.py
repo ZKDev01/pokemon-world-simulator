@@ -27,17 +27,17 @@ class Pokemon():   # por ahora clase lista
         self.height = height
         self.weight = weight
         #self.abilities = abilities
-        #self.forms = forms
-        #self.held_items = held_items
-        #self.locations_areas = locations_areas
-        #self.moves = moves
-        #self.past_types = past_types
-        #self.species = species
+        #self.forms = forms                        NOTE: no esta en bd
+        #self.held_items = held_items              TODO: implementar
+        #self.locations_areas = locations_areas    TODO: revisar si es necesario
+        #self.moves = moves                        NOTE: 'moves' debe ser lista de 4 elementos
+        #self.past_types = past_types              NOTE: no esta en bd
+        #self.species = species                    NOTE: no esta en bd
         self.growth_rate = growth_rate
-        #self.stats = stats
-        #self.types = types
+        #self.stats = stats                        TODO: implementar
+        #self.types = types                        TODO: implementar
         self.generation = generation
-        self.invetory = []   #inventario de objetos
+        self.invetory = []   #inventario de objetos NOTE: cada pokemon lleva solo un objeto a la vez
 
         self.lvl = lvl
         self.learnedMoves = AsignMoves(self)

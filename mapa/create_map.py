@@ -1,4 +1,4 @@
-import mapa.read_bd as read_bd
+import bd.read_bd as read_bd
 import random
 from collections import deque
 import random
