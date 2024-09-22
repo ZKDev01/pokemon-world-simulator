@@ -24,6 +24,12 @@ CREATE TABLE IF NOT EXISTS Pokemons(
     special_attack INTEGER,
     special_defense INTEGER,
     speed INTEGER,
+    ev_hp INTEGER,
+    ev_attack INTEGER,
+    ev_defense INTEGER,
+    ev_special_attack INTEGER,
+    ev_special_defense INTEGER,
+    ev_speed INTEGER,
     habitat_id INTEGER,
     
     FOREIGN KEY(habitat_id) REFERENCES Habitats(id)

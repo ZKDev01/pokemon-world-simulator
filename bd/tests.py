@@ -25,6 +25,7 @@ import read_bd as read
 #     print('OK')
 # print(lista[1])
 
+
 # pokedex_user = pokedex.Pokedex()
 # pichu = pokedex_user.get_pokemon('pichu')
 # print(pichu.evolves_to)

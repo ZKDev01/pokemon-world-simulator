@@ -10,20 +10,6 @@ EXCLUDED_POKES = ['deoxys', 'happiny']
 conn = sqlite3.connect('pokedex.db')
 cursor = conn.cursor()
 
-# def colect_data():
-#     for gen in GENERATIONS:
-#         generation = pb.generation(gen)
-#         for i in tqdm.tqdm(range(len(generation.pokemon_species))):
-#             Pokemon(generation.pokemon_species[i].name)#Con Pokemon tengo Abilities, EggGroups, algunos Moves, algunos Types
-#         for i in tqdm.tqdm(range(len(generation.moves))):
-#             if generation.moves[i].name in all_moves.get_names():
-#                 continue
-#             Move(generation.moves[i].name)
-#         for i in tqdm.tqdm(range(len(generation.types))):
-#             if generation.types[i].name in all_types.get_names():
-#                 continue
-#             Type(generation.types[i].name)
-
 #region get methods
 def get_all_pokemons(total = 1302):
     #Get all pokes that belong to versions firered and leafgreen
@@ -123,9 +109,9 @@ def get_locations():
 def fill_pokemons():
     for poke in all_pokes.get_all_pokes():
         cursor.execute('''
-        INSERT INTO Pokemons(id, name, height, weight, base_experience, growth_rate, generation, hp, attack, defense, special_attack, special_defense, speed, habitat_id)
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-        ''', (poke.id, poke.name, poke.height, poke.weight, poke.base_exp, poke.growth_rate, poke.generation, poke.stats["hp"], poke.stats["attack"], poke.stats["defense"], poke.stats["special-attack"], poke.stats["special-defense"], poke.stats["speed"], poke.habitat[0]))
+        INSERT INTO Pokemons(id, name, height, weight, base_experience, growth_rate, generation, hp, attack, defense, special_attack, special_defense, speed, ev_hp, ev_attack, ev_defense, ev_special_attack, ev_special_defense, ev_speed, habitat_id)
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ''', (poke.id, poke.name, poke.height, poke.weight, poke.base_exp, poke.growth_rate, poke.generation, poke.stats["hp"], poke.stats["attack"], poke.stats["defense"], poke.stats["special-attack"], poke.stats["special-defense"], poke.stats["speed"], poke.ev["hp"], poke.ev["attack"], poke.ev["defense"], poke.ev["special-attack"], poke.ev["special-defense"], poke.ev["speed"], poke.habitat[0]))
         conn.commit()
 
 def fill_types():
