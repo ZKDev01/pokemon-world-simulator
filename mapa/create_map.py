@@ -137,7 +137,7 @@ class Location:
         
     def get_ecosystems(self):
         '''
-        Metodo que retorna un diccionario con los ecosistemas presentes en la ubicacion y los pokemons que se pueden encontrar en cada uno.
+        Metodo que retorna un diccionario con los ecosistemas presentes en la ubicacion y los pokemones que se pueden encontrar en cada uno.
         
         Returns:
         dict
@@ -178,6 +178,30 @@ class Map:
         if connections:
             for connection in connections:
                 self.add_connection(connection[0], connection[1])
+    
+    def get_shortest_path(self, start:str, end:str):
+        if start == end:
+            return [start]
+        
+        visited = set()
+        queue = deque([(start, [start])])
+        
+        while queue:
+            location, path = queue.popleft()
+            visited.add(location)
+            
+            for conn in self.connections:
+                if conn[0].name == location and conn[1].name not in visited:
+                    new_path = path + [conn[1].name]
+                    if conn[1].name == end:
+                        return new_path
+                    queue.append((conn[1].name, new_path))
+                elif conn[1].name == location and conn[0].name not in visited:
+                    new_path = path + [conn[0].name]
+                    if conn[0].name == end:
+                        return new_path
+                    queue.append((conn[0].name, new_path))
+        return None
     
     def get_next_locations(self, location):
         next_locations = []

@@ -44,12 +44,14 @@ class Action():
 ### Nota: Todo entrenador se inicializa con un pokemon que escoge entre algunas opciones que se le brindarán
 
 class Couch():
-    def __init__(self, initialPokemon:Pokemon, heuristic:Heuristic, name='salvaje',):   
+    def __init__(self, initialPokemon:Pokemon, heuristic:Heuristic, choose_team, name='salvaje'):   
         self.pokemonLider = initialPokemon   # es el pokemon que tendrá en primera posición, el pokemon que sale al encontrarse un pokemon salvaje
         self.pokemons = []
         self.deck = []
         self.name = name
         self.heuristic = heuristic
+        
+        self.ideal_team = choose_team()   # una función que le proporciona el equipo con el que quiere combatir el entrenador
 
         self.listToDo = []       # una lista de tareas por hacer
 
