@@ -1576,6 +1576,76 @@ def raise_speed_onestage(move, pokemon1State, pokemon2State, turn):
     pokemon1State.speed = pokemon1State.speed * 1.5
     return False
 
+def fly(move, pokemon1State, pokemon2State, turn):
+    condition = ConditionState(name='volar_v', pokemon=pokemon1State.pokemon, turn=turn, turnsDuration=1, pokemon2=pokemon2State.pokemon)
+    condition1 = ConditionState(name='inmune_fisico', pokemon=pokemon1State.pokemon, turn=turn)
+    condition2 = ConditionState(name='carga', pokemon=pokemon1State.pokemon, turn=turn)
+    pokemon1State.posEffects.append(condition)
+    pokemon1State.posEffects.append(condition1)
+    pokemon1State.posEffects.append(condition2)
+
+    return False
+
+def prevent_fleeing_and_inflicts_damage(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+
+        condition1 = ConditionState(name='trap', pokemon=pokemon2State.pokemon, turn=turn, turnsDuration=random.randint(2, 5))
+        condition2 = ConditionState(name='trap_v', pokemon=pokemon2State.pokemon, turn=turn)
+
+        pokemon2State.negEffects.append(condition1)
+        pokemon2State.negEffects.append(condition2)
+
+        return False
+    return True
+
+def cargar_oneTurn(move, pokemon1State, pokemon2State, turn):
+    condition = ConditionState(name='carga', pokemon=pokemon1State.pokemon, turn=turn)
+    condition1 = ConditionState(name='carga_v', pokemon=pokemon1State.pokemon, turn=turn, turnsDuration=1)
+    pokemon1State.posEffects.append(condition)
+    pokemon1State.posEffects.append(condition1)
+
+    pokemon1State.effMovCargado = normal_attack
+    pokemon1State.effMovCargadoParams = (move, pokemon1State, pokemon2State, turn)
+
+    return False
+
+def keep_attacking_2_3_turns(move, pokemon1State, pokemon2State, turn):
+    condition = ConditionState(name='keep_attacking', pokemon=pokemon1State.pokemon, turn=turn, turnsDuration=random.randint(2,3))
+    pokemon1State.posEffects.append(condition)
+
+    pokemon1State.effMovCargado = normal_attack
+    pokemon1State.effMovCargadoParams = (move, pokemon1State, pokemon2State, turn)
+
+def confuses_user(move, pokemon1State, pokemon2State, turn):
+    accuracy = move.accuracy
+    r = random.randint(1, 100)
+    if r <= accuracy:
+        damage = GetDamage(move=move, attacker_pokemon_state=pokemon1State, attacked_pokemon_state=pokemon2State)
+        pokemon2State.hp -= damage
+        pokemon2State.hp = 0 if pokemon2State.hp <= 0 else pokemon2State.hp
+
+        condition = ConditionState(name='confuso')
+        pokemon1State.negEffects.append(condition)
+
+        return False
+    return True
+
+def disable_move_1_8_turns(move, pokemon1State, pokemon2State, turn):
+    moves = pokemon2State.pokemon.learnedMoves
+    r = random.randint(0, len(moves) - 1)
+
+    moves[r].is_eneabled = False
+    r = random.randint(1, 8)
+
+    condition = ConditionState(name='deshabilita_mov_v', pokemon=pokemon2State.pokemon, turn=turn, turnsDuration=r)
+
+    return False
+
 
 
 
@@ -1587,22 +1657,22 @@ move_effects = {
     'Hits 2-5 times in one turn.':[hits_2_5_times],
     "Scatters money on the ground worth five times the user's level.":[normal_attack],
     "Has a 10_ chance to burn the target.":[perc_to_burn_10],
-    "Has a 10_ chance to freeze the target.":[normal_attack, perc_to_freeze_10],
-    "Has a 10_ chance to paralyze the target.":[normal_attack, perc_to_paralyze_10],
+    "Has a 10_ chance to freeze the target.":[perc_to_freeze_10],
+    "Has a 10_ chance to paralyze the target.":[perc_to_paralyze_10],
     "Causes a one-hit KO.":[one_hit_ko],
-    "Requires a turn to charge before attacking.":[normal_attack],   # pendiente
+    "Requires a turn to charge before attacking.":[cargar_oneTurn],   
     "Raises the user's Attack by two stages.":[raises_atk_2_stages],
-    "Inflicts regular damage and can hit Pokémon in the air.":[normal_attack], # pendiente
+    "Inflicts regular damage and can hit Pokémon in the air.":[normal_attack],
     "Immediately ends wild battles.  Forces trainers to switch Pokémon.":[],    # agregar efecto negativo extra que sea forzar el cambio de pokemon
-    "User flies high into the air, dodging all attacks, and hits next turn.":[], # crear estado positivo donde es inmune a golpes
-    "Prevents the target from fleeing and inflicts damage for 2-5 turns.":[],   # crear estado negativo en el que el pokemon atacado no pueda infligir daño durante de 2 a 5 turnos
+    "User flies high into the air, dodging all attacks, and hits next turn.":[fly],
+    "Prevents the target from fleeing and inflicts damage for 2-5 turns.":[prevent_fleeing_and_inflicts_damage],
     "Has a 30_ chance to make the target flinch.":[has_30_perc_to_make_flinch],
     "Hits twice in one turn.":[normal_attack, normal_attack],
     "If the user misses, it takes half the damage it would have inflicted in recoil.":[miss_then_take_halfdamage],
     "Lowers the target's accuracy by one stage.":[],  # pendiente
     "Has a 30_ chance to paralyze the target.":[percent_to_paralize_30],
     "User receives 1/4 the damage it inflicts in recoil.":[recoil_un_cuarto],
-    "Hits every turn for 2-3 turns, then confuses the user.":[], # pendiente crear un estado positivo que se mantenga atacando durante 2 o 3 turnos consecutivos
+    "Hits every turn for 2-3 turns, then confuses the user.":[confuses_user],
     "User receives 1/3 the damage inflicted in recoil.":[recoil_un_tercio],
     "Lowers the target's Defense by one stage.":[lowers_target_defense_onestage],
     "Has a 30_ chance to poison the target.":[perc_to_poison_30],

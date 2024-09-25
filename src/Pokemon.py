@@ -15,6 +15,9 @@ class PokemonState():
         self.specialDefense = specialDefense
         self.speed = speed
 
+        self.effMovCargado = None   # efecto de movimiento cargado
+        self.effMovCargadoParams = None  # parametros que hay que pasarle a la funcion o efecto cargado
+
 
 class Pokemon():   # por ahora clase lista
     def __init__(self, id, name, types, height, weight, base_experience, growth_rate, generation, # todos estos stats son de tipo int exceptuando el growth_rate, la generation y el name

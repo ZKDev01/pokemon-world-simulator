@@ -18,6 +18,7 @@ class Move():
         self.ailment = ailment
         self.target = target
         self.effects = effects
+        self.isEneabled = True
 
     def DoMove(self, pokemon1State, pokemon2State, turn):
         effects = self.effects

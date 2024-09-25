@@ -216,8 +216,12 @@ def dormido(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=F
    
 def flaqueado(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
     return True
+
+def carga(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    return True
+
     
-afectan_ejecucion_de_movimiento = [confuso, enamorado, paralizado, congelado, dormido, flaqueado]
+afectan_ejecucion_de_movimiento = [confuso, enamorado, paralizado, congelado, dormido, flaqueado, carga]
 
 # 4 reducen o aumentan los puntos de vida del pokemon
 
@@ -335,7 +339,7 @@ def paralizado_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, at
         for i in range(len(negEffects)):
             if negEffects[i].name == 'paralisis' or negEffects[i].name == 'paralisis_v':
                 negEffects.remove(negEffects[i])
-
+    
     return False
         
 def dormido_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
@@ -360,13 +364,10 @@ def dont_leave_battle(activationTurn, turn, turnDuration, pokemon1, pokemon2=Non
 
 def trap_t(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
     if turn - activationTurn == turnDuration:
-        effectsToRemove = []
         negEffects = pokemon1.actualState.negEffects
-        for i in range(len(negEffects)):
-            if negEffects[i].name == 'trap' or negEffects[i].name == 'trap_t':
-                effectsToRemove.append(negEffects[i])
-        for i in range(len(effectsToRemove)):
-            negEffects.remove(effectsToRemove[i])
+        for i in range(len(negEffects)-1, -1, -1):
+            if negEffects[i].name == 'trap' or negEffects[i].name == 'trap_t' or negEffects[i].name == 'dont_leave_battle':
+                negEffects.remove(negEffects[i])
     return True
 
 verificar_salida_de_combate = [dont_leave_battle, trap_t]
@@ -388,10 +389,49 @@ def taunt_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=F
             if negEffects[i].name == 'taunt' or negEffects[i].name == 'taunt_v':
                 negEffects.remove(negEffects[i])
 
+def volar_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    if turn - activationTurn == 1:
+        posEffects =  pokemon1.actualState.posEffects
+        for i in range(len(posEffects)-1, -1, -1):
+            if posEffects[i].name == 'inmune_fisico' or posEffects[i].name == 'volar_v' or posEffects[i].name == 'carga':
+                posEffects.remove(posEffects[i])
+        
+        move = Move(name='fly', power=90, pp=15, accuracy=95, type=3, category='physical', ailment='none', target='selected-pokemon', effects='User flies high into the air, dodging all attacks, and hits next turn.')
+        accuracy = move.accuracy
+        r = random.randint(1, 100)
+        if r <= accuracy:
+            damage = GetDamage(move, pokemon1.actualState, pokemon1.actualState)
+            pokemon2.actualState.hp -= damage
+            pokemon2.actualState.hp = 0 if pokemon2.actualState.hp <= 0 else pokemon2.actualState.hp
+
+def carga_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    if turn - activationTurn == turnDuration:
+        move = pokemon1.actualState.effMovCargadoParams[0]  
+        pokemon1State = pokemon1.actualState.effMovCargadoParams[1]  
+        pokemon2State = pokemon1.actualState.effMovCargadoParams[2]  
+        turn = pokemon1.actualState.effMovCargadoParams[3]  
+
+        pokemon1.effMovCargado(move, pokemon1State, pokemon2State, turn)
+
+        pokemon1.actualState.effMovCargado = None
+        pokemon1.actualState.effMovCargadoParams = None
+
+        posEffects = pokemon1.actualState.posEffects
+
+        for i in range(len(posEffects)-1, -1, -1):
+            if posEffects[i].name == 'carga_v' or posEffects[i].name == 'carga':
+                posEffects.remove(posEffects[i])
 
 
+def inmune_fisico(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    return True
 
-verificar_salida_del_estado = [congelado_v, paralizado_v, dormido_v, taunt_v]
+def deshabilita_mov_v(activationTurn, turn, turnDuration, pokemon1, pokemon2=None, atMap=False):
+    
+
+verificar_salida_del_estado = [congelado_v, paralizado_v, dormido_v, taunt_v, volar_v]
+
+# efectos positivos
 
 
 
