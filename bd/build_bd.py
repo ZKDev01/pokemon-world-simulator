@@ -24,6 +24,12 @@ CREATE TABLE IF NOT EXISTS Pokemons(
     special_attack INTEGER,
     special_defense INTEGER,
     speed INTEGER,
+    ev_hp INTEGER,
+    ev_attack INTEGER,
+    ev_defense INTEGER,
+    ev_special_attack INTEGER,
+    ev_special_defense INTEGER,
+    ev_speed INTEGER,
     habitat_id INTEGER,
     
     FOREIGN KEY(habitat_id) REFERENCES Habitats(id)
@@ -97,6 +103,16 @@ CREATE TABLE IF NOT EXISTS Moves(
     category TEXT,
     ailment TEXT,
     target TEXT,
+    effect_id INTEGER,
+    
+    FOREIGN KEY(type_id) REFERENCES Types(id)
+)
+''')
+
+#Create table Effects
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS Effects(
+    id INTEGER PRIMARY KEY,
     effect TEXT
 )
 ''')

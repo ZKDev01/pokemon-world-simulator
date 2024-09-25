@@ -1,7 +1,7 @@
 import pokebase as pb
 import sqlite3
 import tqdm
-from pokemon import *
+from bd.pokemon import *
 
 REGIONS = [1]
 GENERATIONS = [1] 
@@ -9,20 +9,6 @@ EXCLUDED_POKES = ['deoxys', 'happiny']
 
 conn = sqlite3.connect('pokedex.db')
 cursor = conn.cursor()
-
-# def colect_data():
-#     for gen in GENERATIONS:
-#         generation = pb.generation(gen)
-#         for i in tqdm.tqdm(range(len(generation.pokemon_species))):
-#             Pokemon(generation.pokemon_species[i].name)#Con Pokemon tengo Abilities, EggGroups, algunos Moves, algunos Types
-#         for i in tqdm.tqdm(range(len(generation.moves))):
-#             if generation.moves[i].name in all_moves.get_names():
-#                 continue
-#             Move(generation.moves[i].name)
-#         for i in tqdm.tqdm(range(len(generation.types))):
-#             if generation.types[i].name in all_types.get_names():
-#                 continue
-#             Type(generation.types[i].name)
 
 #region get methods
 def get_all_pokemons(total = 1302):
@@ -123,9 +109,9 @@ def get_locations():
 def fill_pokemons():
     for poke in all_pokes.get_all_pokes():
         cursor.execute('''
-        INSERT INTO Pokemons(id, name, height, weight, base_experience, growth_rate, generation, hp, attack, defense, special_attack, special_defense, speed, habitat_id)
-        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-        ''', (poke.id, poke.name, poke.height, poke.weight, poke.base_exp, poke.growth_rate, poke.generation, poke.stats["hp"], poke.stats["attack"], poke.stats["defense"], poke.stats["special-attack"], poke.stats["special-defense"], poke.stats["speed"], poke.habitat[0]))
+        INSERT INTO Pokemons(id, name, height, weight, base_experience, growth_rate, generation, hp, attack, defense, special_attack, special_defense, speed, ev_hp, ev_attack, ev_defense, ev_special_attack, ev_special_defense, ev_speed, habitat_id)
+        VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ''', (poke.id, poke.name, poke.height, poke.weight, poke.base_exp, poke.growth_rate, poke.generation, poke.stats["hp"], poke.stats["attack"], poke.stats["defense"], poke.stats["special-attack"], poke.stats["special-defense"], poke.stats["speed"], poke.ev["hp"], poke.ev["attack"], poke.ev["defense"], poke.ev["special-attack"], poke.ev["special-defense"], poke.ev["speed"], poke.habitat[0]))
         conn.commit()
 
 def fill_types():
@@ -186,9 +172,9 @@ def fill_pokemon_egg_groups():
 def fill_moves():
     for move in all_moves.get_all_moves():
         cursor.execute('''
-        INSERT INTO Moves(id, name, power, pp, accuracy, type_id, category, ailment, target, effect)
+        INSERT INTO Moves(id, name, power, pp, accuracy, type_id, category, ailment, target, effect_id)
         VALUES(?,?,?,?,?,?,?,?,?,?)
-        ''', (move.id, move.name, move.power, move.pp, move.accuracy, pb.type_(move.type).id, move.category, move.ailment, move.target, move.effects))
+        ''', (move.id, move.name, move.power, move.pp, move.accuracy, pb.type_(move.type).id, move.category, move.ailment, move.target, move.effect_id))
         conn.commit()
         
 def fill_pokemon_moves():
@@ -201,6 +187,14 @@ def fill_pokemon_moves():
                 VALUES(?,?,?,?)
                 ''', (pokemon.id, move.id, type, level))
                 conn.commit()
+                
+def fill_effects():
+    for effect in all_effects.get_all_effects():
+        cursor.execute('''
+        INSERT INTO Effects(id, effect)
+        VALUES(?,?)
+        ''', (effect[0], effect[1]))
+        conn.commit()
             
 def fill_items():
     for item in all_items.get_all_items():
@@ -402,6 +396,7 @@ def get_all():
     get_locations()
           
 def fill_all():
+    fill_effects()
     fill_habitats()
     fill_pokemons()
     fill_types()

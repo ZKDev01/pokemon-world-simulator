@@ -1,4 +1,4 @@
 assets/*
 .venv/
 pokedex.db
-pokedex_.db
+

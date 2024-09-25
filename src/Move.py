@@ -1,7 +1,8 @@
-import sqlite3
+# import sqlite3
+import bd.read_bd as read_bd
 
-conn = sqlite3.connect('pokedex.db')
-cursor = conn.cursor()
+# conn = sqlite3.connect('pokedex.db')
+# cursor = conn.cursor()
 
 
 class Move():
@@ -60,8 +61,9 @@ def AsignMoves(pokemon):
     pokemon_id = pokemon.id
     pokemon_lvl = pokemon.lvl
 
-    cursor.execute(f'SELECT pokemon_id, move_id, learned_at_level FROM Pokemon_Moves WHERE pokemon_id = {pokemon_id}')
-    pokemon_moves = cursor.fetchall()
+    # cursor.execute(f'SELECT pokemon_id, move_id, learned_at_level FROM Pokemon_Moves WHERE pokemon_id = {pokemon_id}')
+    # pokemon_moves = cursor.fetchall()
+    pokemon_moves = read_bd.get_pokemon_move_at_lvl(pokemon_id)
 
     pokemon_moves_at_lvl = []
 
@@ -73,13 +75,15 @@ def AsignMoves(pokemon):
 
     # ordenamos en orden ascendente según el lvl y nos quedamos con los 4 últimos
     pokemon_moves_at_lvl = OrderByLearnedAtLvl(pokemon_moves_at_lvl)
+    
 
     for i in range(len(pokemon_moves_at_lvl)):
         pokemon_move = pokemon_moves_at_lvl[i]
         pokemon_move_id = pokemon_move[1]
 
-        cursor.execute(f'SELECT * FROM Moves WHERE id = {pokemon_move_id}')
-        m = cursor.fetchall()[0]
+        m = read_bd.get_move(pokemon_move_id)
+        # cursor.execute(f'SELECT * FROM Moves WHERE id = {pokemon_move_id}')
+        # m = cursor.fetchall()[0]
 
         move = Move(m[0], m[1], m[2], m[3], m[4], m[5], m[6], m[7], m[8]) # move(id, name, power, pp, accuracy, type_id, category, ailment, target, effect)
         result[i] = move
