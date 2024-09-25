@@ -15,10 +15,13 @@ class PokemonState():
         self.specialDefense = specialDefense
         self.speed = speed
 
+        self.effMovCargado = None   # efecto de movimiento cargado
+        self.effMovCargadoParams = None  # parametros que hay que pasarle a la funcion o efecto cargado
+
 
 class Pokemon():   # por ahora clase lista
     def __init__(self, id, name, types, height, weight, base_experience, growth_rate, generation, # todos estos stats son de tipo int exceptuando el growth_rate, la generation y el name
-                 hp, attack, defense, specialAttack, specialDefense, speed, lvl): 
+                 hp, attack, defense, specialAttack, specialDefense, speed, lvl, couch): 
                                                                                
         self.id = id
         self.name = name
@@ -40,6 +43,8 @@ class Pokemon():   # por ahora clase lista
         self.invetory = []   #inventario de objetos NOTE: cada pokemon lleva solo un objeto a la vez
 
         self.lvl = lvl
+        self.couch = couch
+        
         self.learnedMoves = AsignMoves(self)
 
         self.exp_table = growth_rate_data[self.growth_rate]['levels']    #devuelve una lista de nivel-cant_de_exp_necesaria
