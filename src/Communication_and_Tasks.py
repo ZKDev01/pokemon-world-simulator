@@ -182,5 +182,16 @@ class PropuestaCambio():    # se asume que solo se le pasaran dos parametros
     def __str__(self) -> str:
         return self.information
         
-        
 
+'''
+    La funcion del objetivo es tener un conjunto de tareas o Tasks que hagan cumplir dicho objetivo, y verificar constantemente
+en caso de que se haga cumplir dicho objetivo
+'''        
+
+class Objetivo():   
+    def __init__(self, pokemon=None):
+       if pokemon != None:
+           self.objetivo = f'Capturar Pokemon {pokemon}.' 
+           self.tasks = [
+               
+           ]

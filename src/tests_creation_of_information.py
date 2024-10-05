@@ -1,4 +1,4 @@
-from Communication import *
+from Communication_and_Tasks import *
 
 afirmation = Afirmation(agente=1, coordenada=(3,4))
 print(afirmation)
