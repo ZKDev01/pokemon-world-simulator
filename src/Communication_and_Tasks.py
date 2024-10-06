@@ -16,15 +16,15 @@ class Information():
     
     @staticmethod
     def agente_encontrado(agente, coordenada):
-        return f'Agente {agente} encontrado en coordenada {coordenada}.'
+        return f'Agente {agente} encontrado en coordenada {coordenada}'
     
     @staticmethod
     def pokemon_encontrado(pokemon, coordenada):
-        return f'Pokemon {pokemon} encontrado en coordenada {coordenada}.'
+        return f'Pokemon {pokemon} encontrado en coordenada {coordenada}'
     
     @staticmethod
     def agente_tiene_pokemon(agente, pokemon):
-        return f'Agente {agente} tiene Pokemon {pokemon}.'
+        return f'Agente {agente} tiene Pokemon {pokemon}'
     
     @staticmethod
     def agente_tiene_propuesta(agente, propuesta):
@@ -34,57 +34,57 @@ class Information():
 
     @staticmethod
     def que_sabes_de_agente(agente):
-        return f'Que sabes de Agente {agente}?'
+        return f'Que sabes de Agente {agente}'
     
     @staticmethod
     def que_sabes_de_pokemon(pokemon):
-        return f'Que sabes de Pokemon {pokemon}?'
+        return f'Que sabes de Pokemon {pokemon}'
     
 
     # Propuestas de venta
 
     @staticmethod
     def vendo_pokemon(pokemon, precio):
-        return f'Vendo Pokemon {pokemon} a {precio} unidades.'
+        return f'Vendo Pokemon {pokemon} a {precio} unidades'
     
     @staticmethod
     def vendo_informacion_de_pokemon(pokemon, precio):
-        return f'Vendo informacion sobre Pokemon {pokemon} a {precio} unidades.'
+        return f'Vendo informacion sobre Pokemon {pokemon} a {precio} unidades'
     
     @staticmethod
     def vendo_informacion_de_agente(agente, precio):
-        return f'Vendo informacion sobre Agente {agente} a {precio} unidades.'
+        return f'Vendo informacion sobre Agente {agente} a {precio} unidades'
     
 
     # Propuesta de cambio
     
     @staticmethod
     def cambio_pokemon_por_pokemon(pokemon_a_dar, pokemon_a_recibir):
-        return f'Cambio Pokemon {pokemon_a_dar} por Pokemon {pokemon_a_recibir}.'
+        return f'Cambio Pokemon {pokemon_a_dar} por Pokemon {pokemon_a_recibir}'
     
     @staticmethod
     def cambio_pokemon_por_informacion_pokemon(pokemon_a_dar, pokemon_inf_a_recibir):
-        return f'Cambio Pokemon {pokemon_a_dar} por informacion sobre Pokemon {pokemon_inf_a_recibir}.'
+        return f'Cambio Pokemon {pokemon_a_dar} por informacion sobre Pokemon {pokemon_inf_a_recibir}'
     
     @staticmethod
     def cambio_pokemon_por_informacion_agente(pokemon_a_dar, agente_inf_a_recibir):
-        return f'Cambio Pokemon {pokemon_a_dar} por informacion sobre Agente {agente_inf_a_recibir}.'
+        return f'Cambio Pokemon {pokemon_a_dar} por informacion sobre Agente {agente_inf_a_recibir}'
     
     @staticmethod
     def cambio_inf_pokemon_por_pokemon(pokemon_inf_a_dar, pokemon_a_recibir):
-        return f'Cambio informacion sobre Pokemon {pokemon_inf_a_dar} por Pokemon {pokemon_a_recibir}.'
+        return f'Cambio informacion sobre Pokemon {pokemon_inf_a_dar} por Pokemon {pokemon_a_recibir}'
     
     @staticmethod
     def cambio_inf_pokemon_por_inf_pokemon(pokemon_inf_a_dar, pokemon_inf_a_recibir):
-        return f'Cambio informacion sobre Pokemon {pokemon_inf_a_dar} por informacion sobre Pokemon {pokemon_inf_a_recibir}.'
+        return f'Cambio informacion sobre Pokemon {pokemon_inf_a_dar} por informacion sobre Pokemon {pokemon_inf_a_recibir}'
     
     @staticmethod
     def cambio_inf_pokemon_por_inf_agente(pokemon_inf_a_dar, agente_inf_a_recibir):
-        return f'Cambio informacion sobre Pokemon {pokemon_inf_a_dar} por informacion sobre Agente {agente_inf_a_recibir}.'
+        return f'Cambio informacion sobre Pokemon {pokemon_inf_a_dar} por informacion sobre Agente {agente_inf_a_recibir}'
 
     @staticmethod
     def cambio_inf_agente_por_pokemon(agente_inf_a_dar, pokemon_a_recibir):
-        return f'Cambio informacion sobre Agente {agente_inf_a_dar} por Pokemon {pokemon_a_recibir}.'
+        return f'Cambio informacion sobre Agente {agente_inf_a_dar} por Pokemon {pokemon_a_recibir}'
     
     @staticmethod
     def cambio_inf_agente_por_inf_pokemon(agente_inf_a_dar, pokemon_inf_a_recibir):
@@ -96,7 +96,10 @@ class Information():
     
 
 
-    
+'''
+    Se clasificarán las informaciones dependiendo que que tipo de información tengan, ejemplo relacionada con un 
+Pokemon, un agente, una propuesta, etc
+'''    
 
 class Afirmation():
     def __init__(self, agente=None, pokemon=None, precio=None, coordenada=None, propuesta=None):
@@ -104,12 +107,16 @@ class Afirmation():
 
         if agente != None and pokemon == None and precio == None and coordenada != None:  # entonces la afirmacion es sobre ubicacione del agente
             self.information = Information.agente_encontrado(agente=agente, coordenada=coordenada)
+            self.type = ['Agente']
         elif agente == None and pokemon != None and precio == None and coordenada != None: # entonces la afirmacion es sobre ubicacion de pokemon
             self.information = Information.pokemon_encontrado(pokemon=pokemon, coordenada=coordenada)
+            self.type = ['Pokemon']
         elif  agente != None and pokemon != None and precio == None and coordenada == None:
             self.information = Information.agente_tiene_pokemon(agente=agente, pokemon=pokemon)
+            self.type = ['Agente', 'Pokemon']
         elif agente != None and propuesta != None:
             self.information = Information.agente_tiene_propuesta(agente=agente, propuesta=propuesta)
+            self.type = ['Agente', 'Propuesta']
 
     def __str__(self) -> str:
         return self.information
@@ -122,8 +129,10 @@ class Question():
 
         if agente != None and pokemon == None:
             self.information = Information.que_sabes_de_agente(agente=agente)
+            self.type = 'agente'
         elif agente == None and pokemon != None:
             self.information = Information.que_sabes_de_pokemon(pokemon=pokemon)
+            self.type = 'pokemon'
     
     def __str__(self) -> str:
         return self.information
@@ -189,9 +198,37 @@ en caso de que se haga cumplir dicho objetivo
 '''        
 
 class Objetivo():   
+    def __init__(self, pokemones=None):
+        self.tasks = []
+
+        if pokemones != None:
+            for i in range(len(pokemones)):
+                task = Task(pokemones[i].id)
+                self.tasks.append(task)
+
+        self.cumplido = False
+
+
+
+    def VerificarCumplido(self, pokemon_inventory):   # recibe como parametro un inventario de pokemon, verifica si el pok esta ahi
+                                                      # en caso de que si entonces el objetivo se cumplio
+        for i in range(len(self.tasks)):
+            if not pokemon_inventory[i].cumplido:
+                return False
+        
+        self.cumplido = True
+        return True
+
+
+
+class Task():
     def __init__(self, pokemon=None):
-       if pokemon != None:
-           self.objetivo = f'Capturar Pokemon {pokemon}.' 
-           self.tasks = [
-               
-           ]
+        self.cumplida = False
+
+        if pokemon != None:
+            self.task = f'Obtener a Pokemon {pokemon}.'
+            self.formas_de_cumplir = ['Capturar', 'Comprar', 'Cambiar']
+            self.type == 'Pokemon'
+
+    def __str__(self) -> str:
+        return self.task
